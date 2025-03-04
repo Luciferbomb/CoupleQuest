@@ -25,38 +25,50 @@ const cleanAnswer = (answer: string): string => {
   return answer.toUpperCase().replace(/[^A-Z]/g, '');
 };
 
-// Determine if two words intersect
-const wordsIntersect = (word1: Word, word2: Word): boolean => {
+// Determine if two words intersect and get the intersection point
+const getWordIntersection = (word1: Word, word2: Word): { intersects: boolean; x?: number; y?: number } => {
   // Only words in different directions can intersect
-  if (word1.direction === word2.direction) return false;
+  if (word1.direction === word2.direction) return { intersects: false };
   
-  const word1Range = 
-    word1.direction === 'across' 
-      ? { 
-          x: { start: word1.position.x, end: word1.position.x + word1.answer.length - 1 },
-          y: { start: word1.position.y, end: word1.position.y }
-        }
-      : { 
-          x: { start: word1.position.x, end: word1.position.x },
-          y: { start: word1.position.y, end: word1.position.y + word1.answer.length - 1 }
+  const word1Positions = new Set<string>();
+  
+  // Get all positions that word1 covers
+  if (word1.direction === 'across') {
+    for (let i = 0; i < word1.answer.length; i++) {
+      word1Positions.add(`${word1.position.y}-${word1.position.x + i}`);
+    }
+  } else {
+    for (let i = 0; i < word1.answer.length; i++) {
+      word1Positions.add(`${word1.position.y + i}-${word1.position.x}`);
+    }
+  }
+  
+  // Check if word2 crosses any position of word1
+  if (word2.direction === 'across') {
+    for (let i = 0; i < word2.answer.length; i++) {
+      const pos = `${word2.position.y}-${word2.position.x + i}`;
+      if (word1Positions.has(pos)) {
+        return { 
+          intersects: true, 
+          x: word2.position.x + i,
+          y: word2.position.y
         };
-        
-  const word2Range = 
-    word2.direction === 'across' 
-      ? { 
-          x: { start: word2.position.x, end: word2.position.x + word2.answer.length - 1 },
-          y: { start: word2.position.y, end: word2.position.y }
-        }
-      : { 
-          x: { start: word2.position.x, end: word2.position.x },
-          y: { start: word2.position.y, end: word2.position.y + word2.answer.length - 1 }
+      }
+    }
+  } else {
+    for (let i = 0; i < word2.answer.length; i++) {
+      const pos = `${word2.position.y + i}-${word2.position.x}`;
+      if (word1Positions.has(pos)) {
+        return { 
+          intersects: true, 
+          x: word2.position.x,
+          y: word2.position.y + i
         };
+      }
+    }
+  }
   
-  // Check if ranges overlap
-  const xOverlap = !(word1Range.x.end < word2Range.x.start || word1Range.x.start > word2Range.x.end);
-  const yOverlap = !(word1Range.y.end < word2Range.y.start || word1Range.y.start > word2Range.y.end);
-  
-  return xOverlap && yOverlap;
+  return { intersects: false };
 };
 
 // Find all possible intersections between words
@@ -71,7 +83,19 @@ const findIntersections = (word1: string, word2: string): { index1: number; inde
     }
   }
   
-  return intersections;
+  // Sort intersections by a priority score that favors middle intersections
+  // and avoids edges of words where possible
+  return intersections.sort((a, b) => {
+    const scoreA = Math.min(
+      Math.min(a.index1, word1.length - a.index1 - 1),
+      Math.min(a.index2, word2.length - a.index2 - 1)
+    );
+    const scoreB = Math.min(
+      Math.min(b.index1, word1.length - b.index1 - 1),
+      Math.min(b.index2, word2.length - b.index2 - 1)
+    );
+    return scoreB - scoreA; // Higher score first (middle intersections)
+  });
 };
 
 // Check if a word placement is valid
@@ -87,50 +111,112 @@ const isValidPlacement = (word: Word, placedWords: Word[], gridSize: number): bo
     }
   }
   
-  // Check for overlaps/conflicts with already placed words
-  for (const placedWord of placedWords) {
-    if (wordsIntersect(word, placedWord)) {
-      // Check if the intersection character matches
-      const intersection = 
-        word.direction === 'across' 
-          ? { 
-              wordIndex: word.position.x - (placedWord.position.x - placedWord.position.y + word.position.y),
-              placedWordIndex: placedWord.position.y - placedWord.position.y + word.position.y
-            }
-          : { 
-              wordIndex: word.position.y - (placedWord.position.y - placedWord.position.x + word.position.x),
-              placedWordIndex: placedWord.position.x - placedWord.position.x + word.position.x
-            };
+  // For better readability, ensure there's at least one cell spacing around words
+  // unless they're properly intersecting
+  const wordCells = new Set<string>();
+  const adjacentCells = new Set<string>();
+  
+  if (word.direction === 'across') {
+    // Word cells
+    for (let i = 0; i < word.answer.length; i++) {
+      wordCells.add(`${word.position.y}-${word.position.x + i}`);
       
-      if (word.answer[intersection.wordIndex] !== placedWord.answer[intersection.placedWordIndex]) {
-        return false;
+      // Adjacent cells (above and below)
+      if (word.position.y > 0) adjacentCells.add(`${word.position.y - 1}-${word.position.x + i}`);
+      if (word.position.y < gridSize - 1) adjacentCells.add(`${word.position.y + 1}-${word.position.x + i}`);
+    }
+    
+    // Adjacent cells (left and right)
+    if (word.position.x > 0) adjacentCells.add(`${word.position.y}-${word.position.x - 1}`);
+    if (word.position.x + word.answer.length < gridSize) {
+      adjacentCells.add(`${word.position.y}-${word.position.x + word.answer.length}`);
+    }
+  } else {
+    // Word cells
+    for (let i = 0; i < word.answer.length; i++) {
+      wordCells.add(`${word.position.y + i}-${word.position.x}`);
+      
+      // Adjacent cells (left and right)
+      if (word.position.x > 0) adjacentCells.add(`${word.position.y + i}-${word.position.x - 1}`);
+      if (word.position.x < gridSize - 1) adjacentCells.add(`${word.position.y + i}-${word.position.x + 1}`);
+    }
+    
+    // Adjacent cells (above and below)
+    if (word.position.y > 0) adjacentCells.add(`${word.position.y - 1}-${word.position.x}`);
+    if (word.position.y + word.answer.length < gridSize) {
+      adjacentCells.add(`${word.position.y + word.answer.length}-${word.position.x}`);
+    }
+  }
+  
+  for (const placedWord of placedWords) {
+    const intersection = getWordIntersection(word, placedWord);
+    const placedWordCells = new Set<string>();
+    
+    if (placedWord.direction === 'across') {
+      for (let i = 0; i < placedWord.answer.length; i++) {
+        placedWordCells.add(`${placedWord.position.y}-${placedWord.position.x + i}`);
       }
     } else {
-      // Check if the word occupies any cell that's already occupied by another word
-      const wordCells = new Set<string>();
+      for (let i = 0; i < placedWord.answer.length; i++) {
+        placedWordCells.add(`${placedWord.position.y + i}-${placedWord.position.x}`);
+      }
+    }
+    
+    // Check for invalid overlaps
+    for (const cell of wordCells) {
+      if (placedWordCells.has(cell)) {
+        if (!intersection.intersects || 
+            cell !== `${intersection.y}-${intersection.x}`) {
+          return false; // Overlapping cells that are not at intersection
+        }
+        
+        // Check if the intersection character matches
+        const [yStr, xStr] = cell.split('-');
+        const y = parseInt(yStr);
+        const x = parseInt(xStr);
+        
+        let wordChar = '';
+        let placedWordChar = '';
+        
+        if (word.direction === 'across') {
+          wordChar = word.answer[x - word.position.x];
+          placedWordChar = placedWord.answer[y - placedWord.position.y];
+        } else {
+          wordChar = word.answer[y - word.position.y];
+          placedWordChar = placedWord.answer[x - placedWord.position.x];
+        }
+        
+        if (wordChar !== placedWordChar) {
+          return false; // Characters at intersection don't match
+        }
+      }
+    }
+    
+    // Check for adjacent word cells (only allow at intersections)
+    if (intersection.intersects) {
+      // Allow adjacency only at intersection point and its immediate surroundings
+      const allowedAdjacencies = new Set<string>();
+      
       if (word.direction === 'across') {
-        for (let i = 0; i < word.answer.length; i++) {
-          wordCells.add(`${word.position.y}-${word.position.x + i}`);
+        // For across word, allow adjacency at intersection column
+        for (let y = 0; y < gridSize; y++) {
+          allowedAdjacencies.add(`${y}-${intersection.x}`);
         }
       } else {
-        for (let i = 0; i < word.answer.length; i++) {
-          wordCells.add(`${word.position.y + i}-${word.position.x}`);
+        // For down word, allow adjacency at intersection row
+        for (let x = 0; x < gridSize; x++) {
+          allowedAdjacencies.add(`${intersection.y}-${x}`);
         }
       }
       
-      const placedWordCells = new Set<string>();
-      if (placedWord.direction === 'across') {
-        for (let i = 0; i < placedWord.answer.length; i++) {
-          placedWordCells.add(`${placedWord.position.y}-${placedWord.position.x + i}`);
-        }
-      } else {
-        for (let i = 0; i < placedWord.answer.length; i++) {
-          placedWordCells.add(`${placedWord.position.y + i}-${placedWord.position.x}`);
+      for (const cell of adjacentCells) {
+        if (placedWordCells.has(cell) && !allowedAdjacencies.has(cell)) {
+          return false; // Adjacent cells that shouldn't be adjacent
         }
       }
-      
-      // Check if there's any cell that both words occupy
-      for (const cell of wordCells) {
+    } else {
+      // If no intersection, don't allow any adjacency
+      for (const cell of adjacentCells) {
         if (placedWordCells.has(cell)) {
           return false;
         }
@@ -150,7 +236,7 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
   
   const words: Word[] = [];
   let wordNumber = 1;
-  const gridSize = 15; // Fixed grid size
+  const gridSize = 20; // Increased grid size for better spacing
   
   // Start with the longest answer
   cleanedAnswers.sort((a, b) => b.answer.length - a.answer.length);
@@ -174,16 +260,25 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
     const currentAnswer = cleanedAnswers[i];
     let placed = false;
     
-    // Try to connect to each existing word
-    for (const placedWord of words) {
+    // Shuffle existing words to get different layouts
+    const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+    
+    // Try to connect to each existing word with a stronger preference for
+    // words that have fewer connections already
+    for (const placedWord of shuffledWords) {
+      // Count how many words already intersect with this word
+      const intersectionCount = words.filter(w => 
+        getWordIntersection(placedWord, w).intersects
+      ).length;
+      
+      // Skip words with too many intersections to avoid crowding
+      if (intersectionCount >= 3) continue;
+      
       // Only try to connect words in the opposite direction
       const direction = placedWord.direction === 'across' ? 'down' : 'across';
       
       // Find possible intersections
       const intersections = findIntersections(placedWord.answer, currentAnswer.answer);
-      
-      // Shuffle intersections to get different layouts each time
-      intersections.sort(() => Math.random() - 0.5);
       
       for (const intersection of intersections) {
         let newWord: Word;
@@ -223,14 +318,12 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
       if (placed) break;
     }
     
-    // If we couldn't place the word, try again with a random orientation
+    // If we couldn't place the word, try again without intersection
     if (!placed) {
-      const direction = Math.random() > 0.5 ? 'across' : 'down';
-      
-      // Try a few random positions
       for (let attempt = 0; attempt < 50; attempt++) {
-        const x = Math.floor(Math.random() * gridSize);
-        const y = Math.floor(Math.random() * gridSize);
+        const direction = Math.random() > 0.5 ? 'across' : 'down';
+        const x = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
+        const y = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
         
         const newWord: Word = {
           answer: currentAnswer.answer,

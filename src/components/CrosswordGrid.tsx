@@ -63,6 +63,9 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
   });
   const [completed, setCompleted] = useState<boolean>(false);
   
+  // Track active words
+  const [activeWords, setActiveWords] = useState<Word[]>([]);
+  
   // Start the timer
   useEffect(() => {
     timerRef.current = window.setInterval(() => {
@@ -81,8 +84,65 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     }
   }, [completed]);
   
+  // Find words that include the current cell
+  useEffect(() => {
+    if (!activeCell) return;
+    
+    const wordsAtCell = words.filter(word => {
+      const { x, y } = word.position;
+      if (word.direction === 'across') {
+        return activeCell.row === y && 
+               activeCell.col >= x && 
+               activeCell.col < x + word.answer.length;
+      } else {
+        return activeCell.col === x && 
+               activeCell.row >= y && 
+               activeCell.row < y + word.answer.length;
+      }
+    });
+    
+    // Prioritize words in the current direction
+    const acrossWords = wordsAtCell.filter(w => w.direction === 'across');
+    const downWords = wordsAtCell.filter(w => w.direction === 'down');
+    
+    if (activeDirection === 'across' && acrossWords.length > 0) {
+      setActiveWords([...acrossWords, ...downWords]);
+    } else if (activeDirection === 'down' && downWords.length > 0) {
+      setActiveWords([...downWords, ...acrossWords]);
+    } else {
+      setActiveWords(wordsAtCell);
+      
+      // If no words in current direction but we have words in the other direction,
+      // switch direction
+      if (activeDirection === 'across' && downWords.length > 0) {
+        setActiveDirection('down');
+      } else if (activeDirection === 'down' && acrossWords.length > 0) {
+        setActiveDirection('across');
+      }
+    }
+  }, [activeCell, activeDirection, words]);
+  
   // Find the next cell in the current direction
   const findNextCell = useCallback((row: number, col: number, direction: 'across' | 'down') => {
+    // First, try to find next cell in the current word
+    if (activeWords.length > 0) {
+      const activeWord = activeWords.find(w => w.direction === direction);
+      if (activeWord) {
+        const { x, y } = activeWord.position;
+        const index = direction === 'across' ? col - x : row - y;
+        
+        if (index < activeWord.answer.length - 1) {
+          // Move to next cell in current word
+          if (direction === 'across') {
+            return { row, col: col + 1 };
+          } else {
+            return { row: row + 1, col };
+          }
+        }
+      }
+    }
+    
+    // If we're at the end of the word or no active word, find next word cell
     if (direction === 'across') {
       for (let c = col + 1; c < gridSize; c++) {
         if (!blackCells[row][c]) return { row, col: c };
@@ -113,10 +173,29 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     }
     
     return null;
-  }, [blackCells, gridSize]);
+  }, [blackCells, gridSize, activeWords]);
   
   // Find the previous cell in the current direction
   const findPrevCell = useCallback((row: number, col: number, direction: 'across' | 'down') => {
+    // First, try to find previous cell in the current word
+    if (activeWords.length > 0) {
+      const activeWord = activeWords.find(w => w.direction === direction);
+      if (activeWord) {
+        const { x, y } = activeWord.position;
+        const index = direction === 'across' ? col - x : row - y;
+        
+        if (index > 0) {
+          // Move to previous cell in current word
+          if (direction === 'across') {
+            return { row, col: col - 1 };
+          } else {
+            return { row: row - 1, col };
+          }
+        }
+      }
+    }
+    
+    // If we're at the start of the word or no active word, find previous word cell
     if (direction === 'across') {
       for (let c = col - 1; c >= 0; c--) {
         if (!blackCells[row][c]) return { row, col: c };
@@ -147,17 +226,16 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     }
     
     return null;
-  }, [blackCells, gridSize]);
+  }, [blackCells, gridSize, activeWords]);
   
   // Calculate cell numbers
   const cellNumbers = (() => {
     const numbers: Record<string, number> = {};
-    let currentNumber = 1;
     
     words.forEach(word => {
       const key = `${word.position.y}-${word.position.x}`;
       if (!numbers[key]) {
-        numbers[key] = currentNumber++;
+        numbers[key] = word.number;
       }
     });
     
@@ -169,6 +247,12 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     const newGrid = [...grid];
     newGrid[row][col] = value;
     setGrid(newGrid);
+    
+    // Restore any validation styling that might have been set
+    setCellValidation({
+      correct: new Set([...cellValidation.correct].filter(key => key !== `${row}-${col}`)),
+      incorrect: new Set([...cellValidation.incorrect].filter(key => key !== `${row}-${col}`))
+    });
     
     // Auto-advance to next cell if a value was entered
     if (value && activeCell) {
@@ -182,6 +266,38 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
   // Handle cell focus
   const handleCellFocus = (row: number, col: number) => {
     setActiveCell({ row, col });
+    
+    // Determine direction based on which words are available at this cell
+    const acrossWord = words.find(word => 
+      word.direction === 'across' && 
+      row === word.position.y && 
+      col >= word.position.x && 
+      col < word.position.x + word.answer.length
+    );
+    
+    const downWord = words.find(word => 
+      word.direction === 'down' && 
+      col === word.position.x && 
+      row >= word.position.y && 
+      row < word.position.y + word.answer.length
+    );
+    
+    // If we have both directions, keep current direction if possible
+    if (acrossWord && downWord) {
+      // Keep current direction if valid
+      if (activeDirection === 'across' && acrossWord) {
+        // Keep across
+      } else if (activeDirection === 'down' && downWord) {
+        // Keep down
+      } else {
+        // Default to across if available, otherwise down
+        setActiveDirection(acrossWord ? 'across' : 'down');
+      }
+    } else {
+      // Set direction based on available word
+      if (acrossWord) setActiveDirection('across');
+      else if (downWord) setActiveDirection('down');
+    }
   };
   
   // Handle keyboard navigation
@@ -189,34 +305,46 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     switch (e.key) {
       case 'ArrowRight':
         e.preventDefault();
-        const rightCell = findNextCell(row, col, 'across');
-        if (rightCell) {
-          setActiveCell(rightCell);
+        if (activeDirection === 'down') {
           setActiveDirection('across');
+        } else {
+          const rightCell = findNextCell(row, col, 'across');
+          if (rightCell) {
+            setActiveCell(rightCell);
+          }
         }
         break;
       case 'ArrowLeft':
         e.preventDefault();
-        const leftCell = findPrevCell(row, col, 'across');
-        if (leftCell) {
-          setActiveCell(leftCell);
+        if (activeDirection === 'down') {
           setActiveDirection('across');
+        } else {
+          const leftCell = findPrevCell(row, col, 'across');
+          if (leftCell) {
+            setActiveCell(leftCell);
+          }
         }
         break;
       case 'ArrowDown':
         e.preventDefault();
-        const downCell = findNextCell(row, col, 'down');
-        if (downCell) {
-          setActiveCell(downCell);
+        if (activeDirection === 'across') {
           setActiveDirection('down');
+        } else {
+          const downCell = findNextCell(row, col, 'down');
+          if (downCell) {
+            setActiveCell(downCell);
+          }
         }
         break;
       case 'ArrowUp':
         e.preventDefault();
-        const upCell = findPrevCell(row, col, 'down');
-        if (upCell) {
-          setActiveCell(upCell);
+        if (activeDirection === 'across') {
           setActiveDirection('down');
+        } else {
+          const upCell = findPrevCell(row, col, 'down');
+          if (upCell) {
+            setActiveCell(upCell);
+          }
         }
         break;
       case 'Tab':
@@ -278,8 +406,13 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
         
         if (currentChar === expectedChar) {
           correct.add(cellKey);
-        } else {
+          incorrect.delete(cellKey); // Ensure it's not in incorrect
+        } else if (currentChar !== '') {
           incorrect.add(cellKey);
+          correct.delete(cellKey); // Ensure it's not in correct
+          allCorrect = false;
+        } else {
+          // Empty cell
           allCorrect = false;
         }
       }
@@ -359,6 +492,7 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
                 number={number}
                 onFocus={() => handleCellFocus(rowIndex, colIndex)}
                 onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+                activeDirection={activeDirection}
               />
             );
           })

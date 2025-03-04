@@ -13,6 +13,7 @@ interface CrosswordCellProps {
   isBlack?: boolean;
   onFocus: () => void;
   onKeyDown: (e: React.KeyboardEvent) => void;
+  activeDirection: 'across' | 'down';
 }
 
 const CrosswordCell: React.FC<CrosswordCellProps> = ({
@@ -24,7 +25,8 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   number,
   isBlack,
   onFocus,
-  onKeyDown
+  onKeyDown,
+  activeDirection
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -82,6 +84,7 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
         onKeyDown={onKeyDown}
         className={inputClassName}
         aria-label={`Crossword cell ${number ? `number ${number}` : ''}`}
+        data-direction={activeDirection}
       />
     </div>
   );

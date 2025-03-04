@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { defaultQuestions } from '@/utils/questions';
-import { Plus, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Plus, ArrowLeft, ArrowRight, Edit } from 'lucide-react';
 
 interface QuestionFormProps {
   onSubmit: (answers: { question: string; answer: string }[]) => void;
@@ -19,6 +20,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
   const [customAnswer, setCustomAnswer] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
   const [customQuestions, setCustomQuestions] = useState<{id: number; text: string; custom: boolean}[]>([]);
+  const [showingCustomForm, setShowingCustomForm] = useState(false);
 
   const handleAnswerChange = (index: number, value: string) => {
     const newAnswers = [...answers];
@@ -28,7 +30,8 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
 
   const handleQuestionChange = (index: number, questionId: number) => {
     const newSelectedQuestions = [...selectedQuestions];
-    const newQuestion = defaultQuestions.find(q => q.id === questionId);
+    const newQuestion = defaultQuestions.find(q => q.id === questionId) || 
+                        customQuestions.find(q => q.id === questionId);
     if (newQuestion) {
       newSelectedQuestions[index] = newQuestion;
       setSelectedQuestions(newSelectedQuestions);
@@ -77,6 +80,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
       // Reset the form
       setCustomQuestion('');
       setCustomAnswer('');
+      setShowingCustomForm(false);
     }
   };
 
@@ -183,6 +187,69 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
               );
             })}
           </div>
+
+          {/* Custom Question Form - Inline on the current question page */}
+          {showingCustomForm ? (
+            <Card className="p-4 mt-6 border-dashed border-2 border-primary/30 bg-primary/5">
+              <div className="space-y-4">
+                <h3 className="font-semibold flex items-center">
+                  <Plus className="mr-2" size={16} />
+                  Add a Custom Question
+                </h3>
+                
+                <div>
+                  <Label htmlFor="inlineCustomQuestion">Your Question</Label>
+                  <Input
+                    id="inlineCustomQuestion"
+                    placeholder="e.g., What was our first date spot?"
+                    value={customQuestion}
+                    onChange={(e) => setCustomQuestion(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="inlineCustomAnswer">The Answer</Label>
+                  <Input
+                    id="inlineCustomAnswer"
+                    placeholder="e.g., Central Park"
+                    value={customAnswer}
+                    onChange={(e) => setCustomAnswer(e.target.value)}
+                    className="mt-1"
+                  />
+                </div>
+                
+                <div className="flex space-x-2">
+                  <Button 
+                    type="button" 
+                    onClick={addCustomQuestion}
+                    disabled={!customQuestion.trim() || !customAnswer.trim()}
+                    className="flex-1"
+                  >
+                    Add Question
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setShowingCustomForm(false)}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ) : (
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setShowingCustomForm(true)}
+              className="w-full mt-4 border-dashed"
+            >
+              <Plus className="mr-2" size={16} />
+              Add Custom Question
+            </Button>
+          )}
           
           <div className="flex justify-between mt-8">
             {currentStep > 0 && (
@@ -213,7 +280,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                 className="ml-auto transition-all"
                 disabled={!isCurrentStepValid()}
               >
-                Custom Questions
+                Review All Questions
                 <ArrowRight className="ml-1" size={16} />
               </Button>
             )}
@@ -222,18 +289,38 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
       ) : (
         <div className="space-y-6 animate-fade-in">
           <div className="text-center mb-6">
-            <h2 className="text-2xl font-semibold">Add Custom Questions (Optional)</h2>
+            <h2 className="text-2xl font-semibold">Review Your Questions</h2>
             <p className="text-muted-foreground">
-              Want to make your puzzle more personal? Add your own questions!
+              Make sure everything is correct before generating your puzzle.
             </p>
           </div>
           
-          <Card className="p-6">
+          <div className="space-y-4">
+            {selectedQuestions.map((question, index) => (
+              <Card key={index} className="p-4 flex justify-between items-center">
+                <div className="flex-1">
+                  <p className="font-medium">{question.text.replace('[NAME]', creatorName)}</p>
+                  <p className="text-primary mt-1">{answers[index]}</p>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => setCurrentStep(Math.floor(index / 2))}
+                  className="ml-2"
+                >
+                  <Edit size={16} />
+                </Button>
+              </Card>
+            ))}
+          </div>
+          
+          <Card className="p-6 mt-6">
             <div className="space-y-4">
+              <h3 className="font-medium">Add One More Custom Question</h3>
               <div>
-                <Label htmlFor="customQuestion">Your Question</Label>
+                <Label htmlFor="finalCustomQuestion">Your Question</Label>
                 <Input
-                  id="customQuestion"
+                  id="finalCustomQuestion"
                   placeholder="e.g., What was our first date spot?"
                   value={customQuestion}
                   onChange={(e) => setCustomQuestion(e.target.value)}
@@ -241,9 +328,9 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
               </div>
               
               <div>
-                <Label htmlFor="customAnswer">The Answer</Label>
+                <Label htmlFor="finalCustomAnswer">The Answer</Label>
                 <Input
-                  id="customAnswer"
+                  id="finalCustomAnswer"
                   placeholder="e.g., Central Park"
                   value={customAnswer}
                   onChange={(e) => setCustomAnswer(e.target.value)}
