@@ -37,13 +37,13 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   }, [isActive]);
 
   if (isBlack) {
-    return <div className="crossword-cell bg-black" />;
+    return null; // Return null instead of a black cell to reduce black space
   }
 
   const cellClassName = `
     crossword-cell relative
     border border-border
-    w-10 h-10
+    w-9 h-9 sm:w-10 sm:h-10
     flex items-center justify-center
     select-none text-center 
     transition-all duration-200

@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import CrosswordCell from './CrosswordCell';
 import { Button } from '@/components/ui/button';
 import { Check, Clock } from 'lucide-react';
