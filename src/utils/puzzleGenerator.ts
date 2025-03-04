@@ -229,17 +229,24 @@ const isValidPlacement = (word: Word, placedWords: Word[], gridSize: number): bo
 
 // Generate crossword puzzle from a list of answers
 export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
-  const cleanedAnswers = answers.map(a => ({
-    ...a,
-    answer: cleanAnswer(a.answer)
-  })).filter(a => a.answer.length > 2); // Filter out answers that are too short
+  // Clean and filter answers
+  const cleanedAnswers = answers
+    .map(a => ({
+      ...a,
+      answer: cleanAnswer(a.answer)
+    }))
+    .filter(a => a.answer.length > 2); // Filter out answers that are too short
+  
+  if (cleanedAnswers.length === 0) {
+    throw new Error("No valid answers to create a puzzle");
+  }
+  
+  // Sort answers by length (longest first)
+  cleanedAnswers.sort((a, b) => b.answer.length - a.answer.length);
   
   const words: Word[] = [];
   let wordNumber = 1;
-  const gridSize = 20; // Increased grid size for better spacing
-  
-  // Start with the longest answer
-  cleanedAnswers.sort((a, b) => b.answer.length - a.answer.length);
+  const gridSize = Math.min(30, Math.max(15, Math.ceil(cleanedAnswers.length * 2))); // Dynamic grid size
   
   // Place first word horizontally in the middle
   const firstWord: Word = {
@@ -255,80 +262,183 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
   
   words.push(firstWord);
   
-  // Try to place remaining words
-  for (let i = 1; i < cleanedAnswers.length; i++) {
-    const currentAnswer = cleanedAnswers[i];
-    let placed = false;
+  // Try to place second word vertically to ensure we have words in both directions
+  if (cleanedAnswers.length > 1) {
+    const secondAnswer = cleanedAnswers[1];
+    let secondWordPlaced = false;
     
-    // Shuffle existing words to get different layouts
-    const shuffledWords = [...words].sort(() => Math.random() - 0.5);
+    // Find intersections between first and second words
+    const intersections = findIntersections(firstWord.answer, secondAnswer.answer);
     
-    // Try to connect to each existing word with a stronger preference for
-    // words that have fewer connections already
-    for (const placedWord of shuffledWords) {
-      // Count how many words already intersect with this word
-      const intersectionCount = words.filter(w => 
-        getWordIntersection(placedWord, w).intersects
-      ).length;
+    // Try each intersection point
+    for (const intersection of intersections) {
+      const secondWord: Word = {
+        answer: secondAnswer.answer,
+        clue: secondAnswer.question,
+        position: {
+          x: firstWord.position.x + intersection.index1,
+          y: firstWord.position.y - intersection.index2
+        },
+        direction: 'down',
+        number: wordNumber
+      };
       
-      // Skip words with too many intersections to avoid crowding
-      if (intersectionCount >= 3) continue;
-      
-      // Only try to connect words in the opposite direction
-      const direction = placedWord.direction === 'across' ? 'down' : 'across';
-      
-      // Find possible intersections
-      const intersections = findIntersections(placedWord.answer, currentAnswer.answer);
-      
-      for (const intersection of intersections) {
-        let newWord: Word;
+      if (isValidPlacement(secondWord, words, gridSize)) {
+        words.push(secondWord);
+        wordNumber++;
+        secondWordPlaced = true;
+        break;
+      }
+    }
+    
+    // If we couldn't place the second word, try a few more spots
+    if (!secondWordPlaced) {
+      // Try middle position of first word
+      const midPoint = Math.floor(firstWord.answer.length / 2);
+      for (let i = 0; i < secondAnswer.answer.length; i++) {
+        const secondWord: Word = {
+          answer: secondAnswer.answer,
+          clue: secondAnswer.question,
+          position: {
+            x: firstWord.position.x + midPoint,
+            y: firstWord.position.y - i
+          },
+          direction: 'down',
+          number: wordNumber
+        };
         
-        if (direction === 'across') {
-          newWord = {
-            answer: currentAnswer.answer,
-            clue: currentAnswer.question,
-            position: {
-              x: placedWord.position.x - intersection.index1,
-              y: placedWord.position.y + intersection.index2
-            },
-            direction,
-            number: wordNumber
-          };
-        } else {
-          newWord = {
-            answer: currentAnswer.answer,
-            clue: currentAnswer.question,
-            position: {
-              x: placedWord.position.x + intersection.index2,
-              y: placedWord.position.y - intersection.index1
-            },
-            direction,
-            number: wordNumber
-          };
-        }
-        
-        if (isValidPlacement(newWord, words, gridSize)) {
-          words.push(newWord);
+        if (isValidPlacement(secondWord, words, gridSize)) {
+          words.push(secondWord);
           wordNumber++;
-          placed = true;
+          secondWordPlaced = true;
           break;
         }
       }
+    }
+  }
+  
+  // Make a few placement attempts for each remaining word
+  const MAX_ATTEMPTS = 50;
+  const REQUIRED_INTERSECTIONS = Math.min(2, Math.ceil(cleanedAnswers.length / 3));
+  
+  // Track how many across/down words we have
+  let acrossCount = words.filter(w => w.direction === 'across').length;
+  let downCount = words.filter(w => w.direction === 'down').length;
+  
+  // Try to place remaining words with multiple intersection attempts
+  for (let i = words.length < 2 ? 1 : 2; i < cleanedAnswers.length; i++) {
+    const currentAnswer = cleanedAnswers[i];
+    let placed = false;
+    
+    // Prefer placing words in the direction that has fewer words
+    const preferredDirection = acrossCount < downCount ? 'across' : 'down';
+    
+    // Try to connect to existing words with intersections
+    for (let attempt = 0; attempt < MAX_ATTEMPTS && !placed; attempt++) {
+      // Try alternating directions with a preference for the one with fewer words
+      const direction = attempt % 2 === 0 ? preferredDirection 
+        : (preferredDirection === 'across' ? 'down' : 'across');
       
-      if (placed) break;
+      // Find a random placed word to try connecting to
+      // But prioritize words with fewer connections
+      const placedWordsByConnections = [...words].sort((a, b) => {
+        const aConnections = words.filter(w => getWordIntersection(a, w).intersects).length;
+        const bConnections = words.filter(w => getWordIntersection(b, w).intersects).length;
+        return aConnections - bConnections;
+      });
+      
+      // Try each placed word, prioritizing those with fewer connections
+      for (const placedWord of placedWordsByConnections) {
+        // Skip if trying to connect to a word in the same direction
+        if (placedWord.direction === direction) continue;
+        
+        // Count existing connections for this word
+        const connectionCount = words.filter(w => 
+          getWordIntersection(placedWord, w).intersects
+        ).length;
+        
+        // Skip if this word already has too many connections (to avoid crowding)
+        if (connectionCount > REQUIRED_INTERSECTIONS) continue;
+        
+        // Find possible intersections
+        const intersections = findIntersections(placedWord.answer, currentAnswer.answer);
+        
+        // Shuffle intersections to increase variety
+        const shuffledIntersections = [...intersections].sort(() => Math.random() - 0.5);
+        
+        for (const intersection of shuffledIntersections) {
+          let newWord: Word;
+          
+          if (direction === 'across') {
+            newWord = {
+              answer: currentAnswer.answer,
+              clue: currentAnswer.question,
+              position: {
+                x: placedWord.position.x - intersection.index1,
+                y: placedWord.position.y + intersection.index2
+              },
+              direction,
+              number: wordNumber
+            };
+          } else {
+            newWord = {
+              answer: currentAnswer.answer,
+              clue: currentAnswer.question,
+              position: {
+                x: placedWord.position.x + intersection.index2,
+                y: placedWord.position.y - intersection.index1
+              },
+              direction,
+              number: wordNumber
+            };
+          }
+          
+          if (isValidPlacement(newWord, words, gridSize)) {
+            words.push(newWord);
+            wordNumber++;
+            placed = true;
+            
+            // Update across/down count
+            if (direction === 'across') acrossCount++;
+            else downCount++;
+            
+            break;
+          }
+        }
+        
+        if (placed) break;
+      }
     }
     
-    // If we couldn't place the word, try again without intersection
+    // If all intersection attempts failed, try placing the word independently
     if (!placed) {
-      for (let attempt = 0; attempt < 50; attempt++) {
-        const direction = Math.random() > 0.5 ? 'across' : 'down';
-        const x = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
-        const y = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
+      // For better connectivity, still try to place near existing words
+      for (let attempt = 0; attempt < 20; attempt++) {
+        // Alternate direction but prefer the one with fewer words
+        const direction = attempt % 2 === 0 ? preferredDirection 
+          : (preferredDirection === 'across' ? 'down' : 'across');
+        
+        // Find a random position in the grid
+        let x, y;
+        if (direction === 'across') {
+          x = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
+          y = Math.floor(Math.random() * gridSize);
+        } else {
+          x = Math.floor(Math.random() * gridSize);
+          y = Math.floor(Math.random() * (gridSize - currentAnswer.answer.length));
+        }
+        
+        // Place near existing words
+        const nearX = Math.max(0, Math.min(gridSize - 1, x + Math.floor(Math.random() * 5) - 2));
+        const nearY = Math.max(0, Math.min(gridSize - 1, y + Math.floor(Math.random() * 5) - 2));
         
         const newWord: Word = {
           answer: currentAnswer.answer,
           clue: currentAnswer.question,
-          position: { x, y },
+          position: { 
+            x: direction === 'across' ? nearX : x, 
+            y: direction === 'down' ? nearY : y 
+          },
           direction,
           number: wordNumber
         };
@@ -336,9 +446,52 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
         if (isValidPlacement(newWord, words, gridSize)) {
           words.push(newWord);
           wordNumber++;
+          
+          // Update across/down count
+          if (direction === 'across') acrossCount++;
+          else downCount++;
+          
           placed = true;
           break;
         }
+      }
+    }
+    
+    // If we still couldn't place the word, skip it for now
+    if (!placed) {
+      console.log(`Couldn't place word: ${currentAnswer.answer}`);
+    }
+  }
+  
+  // Ensure there are words in both directions
+  if (acrossCount === 0 || downCount === 0) {
+    // If we have no words in one direction, place at least one
+    const missingDirection = acrossCount === 0 ? 'across' : 'down';
+    
+    for (let i = 0; i < cleanedAnswers.length && (acrossCount === 0 || downCount === 0); i++) {
+      // Skip words we've already placed
+      if (words.some(w => w.clue === cleanedAnswers[i].question)) continue;
+      
+      const answer = cleanedAnswers[i];
+      
+      // Place in the center of the grid
+      const centerX = Math.floor(gridSize / 2) - (missingDirection === 'across' ? Math.floor(answer.answer.length / 2) : 0);
+      const centerY = Math.floor(gridSize / 2) - (missingDirection === 'down' ? Math.floor(answer.answer.length / 2) : 0);
+      
+      const newWord: Word = {
+        answer: answer.answer,
+        clue: answer.question,
+        position: { x: centerX, y: centerY },
+        direction: missingDirection,
+        number: wordNumber
+      };
+      
+      if (isValidPlacement(newWord, words, gridSize)) {
+        words.push(newWord);
+        wordNumber++;
+        
+        if (missingDirection === 'across') acrossCount++;
+        else downCount++;
       }
     }
   }
@@ -363,6 +516,29 @@ export const generateCrosswordPuzzle = (answers: Answer[]): CrosswordPuzzle => {
     }
     word.number = cellNumbers[key];
   });
+  
+  // Validate the final puzzle
+  if (words.length < Math.min(3, cleanedAnswers.length)) {
+    throw new Error("Failed to create a valid crossword puzzle with enough connected words");
+  }
+  
+  if (acrossCount === 0 || downCount === 0) {
+    throw new Error("Failed to create a valid crossword puzzle with words in both directions");
+  }
+  
+  // Count intersections to ensure puzzle is connected
+  let totalIntersections = 0;
+  for (let i = 0; i < words.length; i++) {
+    for (let j = i + 1; j < words.length; j++) {
+      if (getWordIntersection(words[i], words[j]).intersects) {
+        totalIntersections++;
+      }
+    }
+  }
+  
+  if (totalIntersections < Math.min(words.length - 1, 2)) {
+    throw new Error("Failed to create a sufficiently connected crossword puzzle");
+  }
   
   return {
     words: sortedWords,

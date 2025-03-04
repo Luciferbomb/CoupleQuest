@@ -48,7 +48,7 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
     select-none text-center 
     transition-all duration-200
     ${isActive ? 'border-primary bg-primary/10 shadow-sm z-10' : ''}
-    ${isCorrect ? 'bg-[#F2FCE2] border-green-300' : ''}
+    ${isCorrect ? 'bg-green-100 border-green-400' : ''}
     ${isIncorrect ? 'bg-red-100 border-red-300' : ''}
   `;
 
