@@ -1,6 +1,8 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import CrosswordCell from './CrosswordCell';
+import { Button } from '@/components/ui/button';
+import { Check, Clock } from 'lucide-react';
+import { formatTime } from '@/utils/timeUtils';
 
 interface Word {
   answer: string;
@@ -16,7 +18,7 @@ interface Word {
 interface CrosswordGridProps {
   words: Word[];
   gridSize: number;
-  onSolve: (isCorrect: boolean) => void;
+  onSolve: (isCorrect: boolean, timeElapsed?: number) => void;
 }
 
 const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
@@ -25,6 +27,11 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     const newGrid = Array(gridSize).fill(null).map(() => Array(gridSize).fill(''));
     return newGrid;
   });
+  
+  // Timer state
+  const [startTime] = useState<number>(Date.now());
+  const [timeElapsed, setTimeElapsed] = useState<number>(0);
+  const timerRef = useRef<number | null>(null);
   
   // Track which cells are part of the puzzle
   const [blackCells, setBlackCells] = useState<boolean[][]>(() => {
@@ -54,6 +61,25 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     correct: new Set(),
     incorrect: new Set()
   });
+  const [completed, setCompleted] = useState<boolean>(false);
+  
+  // Start the timer
+  useEffect(() => {
+    timerRef.current = window.setInterval(() => {
+      setTimeElapsed(Math.floor((Date.now() - startTime) / 1000));
+    }, 1000);
+    
+    return () => {
+      if (timerRef.current) window.clearInterval(timerRef.current);
+    };
+  }, [startTime]);
+  
+  // Stop timer when puzzle is completed
+  useEffect(() => {
+    if (completed && timerRef.current) {
+      window.clearInterval(timerRef.current);
+    }
+  }, [completed]);
   
   // Find the next cell in the current direction
   const findNextCell = useCallback((row: number, col: number, direction: 'across' | 'down') => {
@@ -260,7 +286,13 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     });
     
     setCellValidation({ correct, incorrect });
-    onSolve(allCorrect);
+    
+    if (allCorrect) {
+      setCompleted(true);
+      onSolve(true, timeElapsed);
+    } else {
+      onSolve(false);
+    }
   };
   
   // Set initial active cell
@@ -275,15 +307,22 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
   // Render the grid
   return (
     <div className="flex flex-col items-center space-y-6">
+      <div className="flex items-center justify-between w-full max-w-xl mb-4">
+        <div className="flex items-center bg-muted/50 py-2 px-4 rounded-full">
+          <Clock className="mr-2 text-muted-foreground" size={18} />
+          <span className="text-lg">{formatTime(timeElapsed)}</span>
+        </div>
+      </div>
+      
       <div 
-        className="crossword-grid shadow-elevation-medium bg-white rounded-lg overflow-hidden"
+        className="crossword-grid shadow-lg bg-white rounded-lg overflow-hidden"
         style={{ 
           display: 'grid',
           gridTemplateRows: `repeat(${gridSize}, minmax(0, 1fr))`,
           gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
           gap: '1px',
-          padding: '4px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          padding: '8px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
           maxWidth: '100%',
           width: 'fit-content'
         }}
@@ -296,7 +335,7 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
                 <div
                   key={`${rowIndex}-${colIndex}`}
                   className="crossword-cell bg-black"
-                  style={{ minWidth: '2rem', minHeight: '2rem' }}
+                  style={{ minWidth: '2.5rem', minHeight: '2.5rem' }}
                 />
               );
             }
@@ -327,7 +366,8 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
       </div>
       
       <div className="w-full max-w-md">
-        <Button onClick={validateGrid} className="w-full">
+        <Button onClick={validateGrid} className="w-full flex items-center justify-center">
+          <Check className="mr-2" size={18} />
           Check Answers
         </Button>
       </div>
@@ -336,6 +376,3 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
 };
 
 export default CrosswordGrid;
-
-// Import Button component
-import { Button } from '@/components/ui/button';

@@ -40,14 +40,33 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
 
   const cellClassName = `
     crossword-cell relative
-    ${isActive ? 'crossword-cell-active' : ''}
-    ${isCorrect ? 'crossword-cell-correct' : ''}
-    ${isIncorrect ? 'crossword-cell-incorrect' : ''}
+    border border-border
+    w-10 h-10
+    flex items-center justify-center
+    select-none text-center 
+    transition-all duration-200
+    ${isActive ? 'border-primary bg-primary/10 shadow-sm z-10' : ''}
+    ${isCorrect ? 'bg-[#F2FCE2] border-green-300' : ''}
+    ${isIncorrect ? 'bg-red-100 border-red-300' : ''}
+  `;
+
+  const inputClassName = `
+    w-full h-full
+    text-center font-semibold
+    bg-transparent
+    focus:outline-none
+    uppercase
+    ${isCorrect ? 'text-green-700' : ''}
+    ${isIncorrect ? 'text-red-700' : ''}
   `;
 
   return (
     <div className={cellClassName} onClick={onFocus}>
-      {number && <span className="crossword-cell-number">{number}</span>}
+      {number && (
+        <span className="absolute top-0.5 left-1 text-xs font-medium text-muted-foreground">
+          {number}
+        </span>
+      )}
       <input
         ref={inputRef}
         type="text"
@@ -61,7 +80,7 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
         }}
         onFocus={onFocus}
         onKeyDown={onKeyDown}
-        className="crossword-cell-input"
+        className={inputClassName}
         aria-label={`Crossword cell ${number ? `number ${number}` : ''}`}
       />
     </div>

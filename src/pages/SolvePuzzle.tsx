@@ -7,6 +7,8 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from '@/components/ui/use-toast';
 import CrosswordGrid from '@/components/CrosswordGrid';
 import Navbar from '@/components/Navbar';
+import { Clock, Medal, Send } from 'lucide-react';
+import { formatTime } from '@/utils/timeUtils';
 
 const SolvePuzzle = () => {
   const { puzzleSlug } = useParams<{ puzzleSlug: string }>();
@@ -14,7 +16,9 @@ const SolvePuzzle = () => {
   const [puzzleData, setPuzzleData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [activeClue, setActiveClue] = useState<number | null>(null);
+  const [activeDirection, setActiveDirection] = useState<'across' | 'down'>('across');
   const [completed, setCompleted] = useState(false);
+  const [timeElapsed, setTimeElapsed] = useState<number>(0);
   
   useEffect(() => {
     if (puzzleSlug) {
@@ -35,9 +39,11 @@ const SolvePuzzle = () => {
     setLoading(false);
   }, [puzzleSlug]);
   
-  const handleSolve = (isCorrect: boolean) => {
+  const handleSolve = (isCorrect: boolean, time?: number) => {
     if (isCorrect) {
       setCompleted(true);
+      if (time) setTimeElapsed(time);
+      
       toast({
         title: "Congratulations!",
         description: "You've solved the puzzle correctly!",
@@ -147,17 +153,42 @@ const SolvePuzzle = () => {
           
           {completed ? (
             <div className="text-center my-12 animate-fade-in">
-              <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <span className="text-green-600 font-bold text-2xl">✓</span>
+              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+                <Medal className="text-green-600 h-10 w-10" />
               </div>
               <h2 className="text-2xl font-bold mb-2">Perfect Match!</h2>
-              <p className="text-muted-foreground mb-6">
+              <p className="text-muted-foreground mb-2">
                 You've successfully completed {puzzleData.creatorName}'s relationship puzzle.
                 You really know them well!
               </p>
-              <Button onClick={() => navigate('/')}>
-                Create Your Own Puzzle
-              </Button>
+              
+              <div className="flex items-center justify-center text-lg font-medium mb-6">
+                <Clock className="mr-2 text-primary" />
+                <span>Time: {formatTime(timeElapsed)}</span>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row justify-center gap-4">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/')}
+                  className="sm:flex-1 max-w-xs mx-auto"
+                >
+                  Create Your Own Puzzle
+                </Button>
+                <Button
+                  className="sm:flex-1 max-w-xs mx-auto"
+                  onClick={() => {
+                    // Share functionality
+                    toast({
+                      title: "Share your results",
+                      description: `I solved ${puzzleData.creatorName}'s puzzle in ${formatTime(timeElapsed)}!`
+                    });
+                  }}
+                >
+                  <Send className="mr-2" size={16} />
+                  Share Your Results
+                </Button>
+              </div>
             </div>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -177,11 +208,14 @@ const SolvePuzzle = () => {
                       <li 
                         key={`across-${word.number}`}
                         className={`text-sm p-2 rounded-md transition-colors cursor-pointer ${
-                          activeClue === word.number && word.direction === 'across' 
-                            ? 'bg-primary/10' 
+                          activeClue === word.number && activeDirection === 'across' 
+                            ? 'bg-primary/10 font-medium' 
                             : 'hover:bg-secondary'
                         }`}
-                        onClick={() => setActiveClue(word.number)}
+                        onClick={() => {
+                          setActiveClue(word.number);
+                          setActiveDirection('across');
+                        }}
                       >
                         <span className="font-medium">{word.number}.</span> {word.clue}
                       </li>
@@ -198,11 +232,14 @@ const SolvePuzzle = () => {
                       <li 
                         key={`down-${word.number}`}
                         className={`text-sm p-2 rounded-md transition-colors cursor-pointer ${
-                          activeClue === word.number && word.direction === 'down'
-                            ? 'bg-primary/10' 
+                          activeClue === word.number && activeDirection === 'down'
+                            ? 'bg-primary/10 font-medium' 
                             : 'hover:bg-secondary'
                         }`}
-                        onClick={() => setActiveClue(word.number)}
+                        onClick={() => {
+                          setActiveClue(word.number);
+                          setActiveDirection('down');
+                        }}
                       >
                         <span className="font-medium">{word.number}.</span> {word.clue}
                       </li>

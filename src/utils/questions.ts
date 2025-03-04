@@ -79,5 +79,45 @@ export const defaultQuestions = [
   {
     id: 20,
     text: "What was the first thing [NAME] noticed about you?"
+  },
+  {
+    id: 21,
+    text: "What is [NAME]'s favorite season of the year?"
+  },
+  {
+    id: 22,
+    text: "What color does [NAME] wear the most?"
+  },
+  {
+    id: 23,
+    text: "What is [NAME]'s favorite time of day?"
+  },
+  {
+    id: 24,
+    text: "What is [NAME]'s most cherished possession?"
+  },
+  {
+    id: 25,
+    text: "What makes [NAME] laugh the hardest?"
+  },
+  {
+    id: 26,
+    text: "What is [NAME]'s ideal weekend activity?"
+  },
+  {
+    id: 27,
+    text: "If [NAME] could have any superpower, what would it be?"
+  },
+  {
+    id: 28,
+    text: "What is [NAME]'s favorite holiday?"
+  },
+  {
+    id: 29,
+    text: "What does [NAME] do to relax after a stressful day?"
+  },
+  {
+    id: 30,
+    text: "What was [NAME]'s childhood dream job?"
   }
 ];

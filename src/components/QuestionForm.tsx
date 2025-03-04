@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Card } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { defaultQuestions } from '@/utils/questions';
+import { Plus, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface QuestionFormProps {
   onSubmit: (answers: { question: string; answer: string }[]) => void;
@@ -18,6 +18,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
   const [customQuestion, setCustomQuestion] = useState('');
   const [customAnswer, setCustomAnswer] = useState('');
   const [currentStep, setCurrentStep] = useState(0);
+  const [customQuestions, setCustomQuestions] = useState<{id: number; text: string; custom: boolean}[]>([]);
 
   const handleAnswerChange = (index: number, value: string) => {
     const newAnswers = [...answers];
@@ -36,26 +37,44 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
 
   const addCustomQuestion = () => {
     if (customQuestion.trim() && customAnswer.trim()) {
-      const newQuestion = {
+      const newCustomQuestion = {
         id: Date.now(),
         text: customQuestion,
         custom: true
       };
       
-      if (selectedQuestions.length < 10) {
-        setSelectedQuestions([...selectedQuestions, newQuestion]);
-        setAnswers([...answers, customAnswer]);
-      } else {
-        // Replace the last question
-        const newQuestions = [...selectedQuestions];
-        newQuestions[9] = newQuestion;
-        setSelectedQuestions(newQuestions);
-        
-        const newAnswers = [...answers];
-        newAnswers[9] = customAnswer;
-        setAnswers(newAnswers);
+      setCustomQuestions([...customQuestions, newCustomQuestion]);
+      
+      // Find an empty slot or replace a default question
+      let questionAdded = false;
+      const newSelectedQuestions = [...selectedQuestions];
+      const newAnswers = [...answers];
+      
+      // Try to find a slot with an empty answer
+      for (let i = 0; i < newSelectedQuestions.length; i++) {
+        if (!newAnswers[i] || newAnswers[i].trim() === '') {
+          newSelectedQuestions[i] = newCustomQuestion;
+          newAnswers[i] = customAnswer;
+          questionAdded = true;
+          break;
+        }
       }
       
+      // If no empty slot, replace the last question
+      if (!questionAdded) {
+        if (newSelectedQuestions.length < 10) {
+          newSelectedQuestions.push(newCustomQuestion);
+          newAnswers.push(customAnswer);
+        } else {
+          newSelectedQuestions[9] = newCustomQuestion;
+          newAnswers[9] = customAnswer;
+        }
+      }
+      
+      setSelectedQuestions(newSelectedQuestions);
+      setAnswers(newAnswers);
+      
+      // Reset the form
       setCustomQuestion('');
       setCustomAnswer('');
     }
@@ -75,6 +94,31 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
       return answers.slice(currentStep * 2, (currentStep + 1) * 2).every(a => a.trim());
     }
     return true;
+  };
+
+  const handleRemoveCustomQuestion = (id: number) => {
+    // Remove from customQuestions list
+    setCustomQuestions(customQuestions.filter(q => q.id !== id));
+    
+    // Find and replace in selectedQuestions with a default question
+    const index = selectedQuestions.findIndex(q => q.id === id);
+    if (index !== -1) {
+      const newSelectedQuestions = [...selectedQuestions];
+      const replacementQuestion = defaultQuestions.find(q => !selectedQuestions.some(sq => sq.id === q.id));
+      
+      if (replacementQuestion) {
+        newSelectedQuestions[index] = replacementQuestion;
+      } else {
+        newSelectedQuestions[index] = defaultQuestions[0]; // Fallback
+      }
+      
+      setSelectedQuestions(newSelectedQuestions);
+      
+      // Clear the answer for this question
+      const newAnswers = [...answers];
+      newAnswers[index] = '';
+      setAnswers(newAnswers);
+    }
   };
 
   return (
@@ -103,7 +147,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
             {selectedQuestions.slice(currentStep * 2, (currentStep + 1) * 2).map((question, localIndex) => {
               const globalIndex = currentStep * 2 + localIndex;
               return (
-                <Card key={globalIndex} className="p-4 transition-all duration-300 hover:shadow-elevation-medium">
+                <Card key={globalIndex} className="p-4 transition-all duration-300 hover:shadow-md">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <Label className="text-base font-medium">
@@ -118,6 +162,11 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                         {defaultQuestions.map(q => (
                           <option key={q.id} value={q.id}>
                             {q.text.substring(0, 20)}...
+                          </option>
+                        ))}
+                        {customQuestions.map(q => (
+                          <option key={q.id} value={q.id}>
+                            {q.text.substring(0, 20)}... (Custom)
                           </option>
                         ))}
                       </select>
@@ -143,6 +192,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                 onClick={() => setCurrentStep(currentStep - 1)}
                 className="transition-all"
               >
+                <ArrowLeft className="mr-1" size={16} />
                 Previous
               </Button>
             )}
@@ -154,6 +204,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                 disabled={!isCurrentStepValid()}
               >
                 Next
+                <ArrowRight className="ml-1" size={16} />
               </Button>
             ) : (
               <Button
@@ -163,6 +214,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                 disabled={!isCurrentStepValid()}
               >
                 Custom Questions
+                <ArrowRight className="ml-1" size={16} />
               </Button>
             )}
           </div>
@@ -204,22 +256,29 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
                 disabled={!customQuestion.trim() || !customAnswer.trim()}
                 className="w-full"
               >
+                <Plus className="mr-1" size={16} />
                 Add Question
               </Button>
             </div>
             
-            {selectedQuestions.some(q => (q as any).custom) && (
+            {customQuestions.length > 0 && (
               <div className="mt-6">
                 <Separator className="my-4" />
                 <h3 className="font-medium mb-3">Your Custom Questions:</h3>
                 <ul className="space-y-2">
-                  {selectedQuestions
-                    .filter(q => (q as any).custom)
-                    .map((q, idx) => (
-                      <li key={idx} className="text-sm">
-                        <span className="font-medium">{q.text}</span>
-                      </li>
-                    ))}
+                  {customQuestions.map((q) => (
+                    <li key={q.id} className="flex justify-between items-center text-sm p-2 rounded bg-secondary/40">
+                      <span className="font-medium">{q.text}</span>
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleRemoveCustomQuestion(q.id)}
+                        className="h-8 text-destructive hover:text-destructive/90"
+                      >
+                        Remove
+                      </Button>
+                    </li>
+                  ))}
                 </ul>
               </div>
             )}
@@ -232,6 +291,7 @@ const QuestionForm = ({ onSubmit, creatorName }: QuestionFormProps) => {
               onClick={() => setCurrentStep(4)}
               className="transition-all"
             >
+              <ArrowLeft className="mr-1" size={16} />
               Back
             </Button>
             <Button 
