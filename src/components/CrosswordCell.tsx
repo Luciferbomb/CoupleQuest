@@ -41,15 +41,17 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   }
 
   const cellClassName = `
-    crossword-cell relative
-    border border-border
-    w-9 h-9 sm:w-10 sm:h-10
+    relative
     flex items-center justify-center
-    select-none text-center 
-    transition-all duration-200
-    ${isActive ? 'border-primary bg-primary/10 shadow-sm z-10' : ''}
-    ${isCorrect ? 'bg-green-100 border-green-400' : ''}
-    ${isIncorrect ? 'bg-red-100 border-red-300' : ''}
+    w-9 h-9 sm:w-10 sm:h-10
+    text-center select-none
+    border transition-all duration-200
+    ${isActive ? 'shadow-[0_0_0_2px] shadow-primary z-10' : 'border-warmgray-300 bg-white'}
+    ${isCorrect ? 'bg-green-50 border-green-300' : ''}
+    ${isIncorrect ? 'bg-red-50 border-red-300' : ''}
+    ${isActive && !isCorrect && !isIncorrect ? 'bg-beige-50' : ''}
+    ${activeDirection === 'across' && isActive ? 'after:absolute after:h-[2px] after:bg-primary/40 after:left-0 after:right-0 after:top-1/2 after:-translate-y-1/2 after:z-[-1]' : ''}
+    ${activeDirection === 'down' && isActive ? 'after:absolute after:w-[2px] after:bg-primary/40 after:top-0 after:bottom-0 after:left-1/2 after:-translate-x-1/2 after:z-[-1]' : ''}
   `;
 
   const inputClassName = `
@@ -65,7 +67,7 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
   return (
     <div className={cellClassName} onClick={onFocus}>
       {number && (
-        <span className="absolute top-0.5 left-1 text-xs font-medium text-muted-foreground">
+        <span className="absolute top-0.5 left-1 text-[10px] font-medium text-warmgray-600">
           {number}
         </span>
       )}

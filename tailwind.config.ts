@@ -66,6 +66,30 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				beige: {
+					50: '#FEF9F3',
+					100: '#FDF3E7',
+					200: '#FCE8D0',
+					300: '#F8D5A8',
+					400: '#F5C285',
+					500: '#F0A950',
+					600: '#E89433',
+					700: '#CC7722',
+					800: '#A35E1D',
+					900: '#7C481A',
+				},
+				warmgray: {
+					50: '#F9F7F5',
+					100: '#F2F0ED',
+					200: '#E5E1DB',
+					300: '#D2CCC3',
+					400: '#BCB3A8',
+					500: '#A69A8B',
+					600: '#8C8072',
+					700: '#736A5E',
+					800: '#5E574C',
+					900: '#4A4539',
 				}
 			},
 			borderRadius: {
@@ -127,6 +151,7 @@ export default {
 				'elevation-low': '0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1)',
 				'elevation-medium': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
 				'elevation-high': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+				'crossword': '0 4px 15px rgba(0, 0, 0, 0.05), 0 1px 6px rgba(0, 0, 0, 0.03)',
 			},
 			backdropBlur: {
 				'xs': '2px',
