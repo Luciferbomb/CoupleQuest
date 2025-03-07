@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card } from '@/components/ui/card';
@@ -9,6 +8,8 @@ import CrosswordGrid from '@/components/CrosswordGrid';
 import Navbar from '@/components/Navbar';
 import { Clock, Medal, Send } from 'lucide-react';
 import { formatTime } from '@/utils/timeUtils';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 
 const SolvePuzzle = () => {
   const { puzzleSlug } = useParams<{ puzzleSlug: string }>();
@@ -19,6 +20,9 @@ const SolvePuzzle = () => {
   const [activeDirection, setActiveDirection] = useState<'across' | 'down'>('across');
   const [completed, setCompleted] = useState(false);
   const [timeElapsed, setTimeElapsed] = useState<number>(0);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [completionTime, setCompletionTime] = useState<number | null>(null);
+  const [puzzleCode, setPuzzleCode] = useState('');
   
   useEffect(() => {
     if (puzzleSlug) {
@@ -54,6 +58,10 @@ const SolvePuzzle = () => {
         description: "Some answers are incorrect. Keep trying!",
       });
     }
+  };
+  
+  const handleLoadPuzzle = () => {
+    // Implement the logic to load the puzzle
   };
   
   if (loading) {
@@ -137,120 +145,142 @@ const SolvePuzzle = () => {
     .sort((a: any, b: any) => a.number - b.number);
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-container">
       <Navbar />
       
-      <div className="page-container pt-24 animate-fade-in">
-        <Card className="glass-panel p-6 sm:p-8 max-w-5xl mx-auto">
-          <div className="mb-6 text-center">
-            <h1 className="text-3xl font-bold mb-2">
-              {puzzleData.creatorName}'s Relationship Riddle
+      {loading ? (
+        <div className="flex items-center justify-center h-[70vh]">
+          <div className="animate-pulse flex flex-col items-center">
+            <div className="h-12 w-12 rounded-full bg-primary/20 mb-4"></div>
+            <div className="h-4 w-48 bg-primary/20 rounded"></div>
+          </div>
+        </div>
+      ) : !puzzleData ? (
+        <div className="flex flex-col items-center justify-center h-[70vh]">
+          <div className="text-center max-w-md glass-panel animate-fade-in">
+            <h2 className="text-2xl font-bold mb-4">Puzzle Not Found</h2>
+            <p className="text-muted-foreground mb-6">
+              The puzzle you're looking for doesn't exist or has been removed.
+            </p>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Go Home
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="animate-fade-in">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">
+              <span className="text-gradient">Solve the Puzzle</span>
             </h1>
-            <p className="text-muted-foreground">
-              Solve this crossword puzzle to see how well you know {puzzleData.creatorName}.
+            <p className="text-lg text-muted-foreground">
+              Created by <span className="font-medium">{puzzleData.creatorName}</span>
             </p>
           </div>
           
-          {completed ? (
-            <div className="text-center my-12 animate-fade-in">
-              <div className="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                <Medal className="text-green-600 h-10 w-10" />
+          <div className="puzzle-container flex flex-col lg:flex-row gap-6">
+            <div className="grid-container lg:flex-1 flex justify-center order-1 lg:order-none">
+              <CrosswordGrid 
+                words={puzzleData.puzzle.words} 
+                gridSize={puzzleData.puzzle.gridSize}
+                onSolve={handleSolve}
+              />
+            </div>
+            
+            <div className="clues-container lg:w-80 glass-panel order-2 lg:order-none">
+              <div className="mb-4">
+                <h3 className="font-semibold text-lg mb-2 flex items-center">
+                  <span className="inline-block w-4 h-0.5 bg-primary mr-2"></span>
+                  Across
+                </h3>
+                <ul className="clue-list">
+                  {acrossClues.map((word: any) => (
+                    <li 
+                      key={`across-${word.number}`}
+                      className={`clue-item ${
+                        activeClue === word.number && activeDirection === 'across' 
+                          ? 'active' 
+                          : ''
+                      }`}
+                      onClick={() => {
+                        setActiveClue(word.number);
+                        setActiveDirection('across');
+                      }}
+                    >
+                      <span className="font-medium">{word.number}.</span> {word.clue}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <h2 className="text-2xl font-bold mb-2">Perfect Match!</h2>
-              <p className="text-muted-foreground mb-2">
-                You've successfully completed {puzzleData.creatorName}'s relationship puzzle.
-                You really know them well!
-              </p>
               
-              <div className="flex items-center justify-center text-lg font-medium mb-6">
-                <Clock className="mr-2 text-primary" />
-                <span>Time: {formatTime(timeElapsed)}</span>
-              </div>
+              <Separator className="my-4" />
               
-              <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Button 
-                  variant="outline" 
-                  onClick={() => navigate('/')}
-                  className="sm:flex-1 max-w-xs mx-auto"
-                >
-                  Create Your Own Puzzle
-                </Button>
-                <Button
-                  className="sm:flex-1 max-w-xs mx-auto"
-                  onClick={() => {
-                    // Share functionality
-                    toast({
-                      title: "Share your results",
-                      description: `I solved ${puzzleData.creatorName}'s puzzle in ${formatTime(timeElapsed)}!`
-                    });
-                  }}
-                >
-                  <Send className="mr-2" size={16} />
-                  Share Your Results
-                </Button>
+              <div>
+                <h3 className="font-semibold text-lg mb-2 flex items-center">
+                  <span className="inline-block w-4 h-0.5 bg-secondary mr-2"></span>
+                  Down
+                </h3>
+                <ul className="clue-list">
+                  {downClues.map((word: any) => (
+                    <li 
+                      key={`down-${word.number}`}
+                      className={`clue-item ${
+                        activeClue === word.number && activeDirection === 'down' 
+                          ? 'active' 
+                          : ''
+                      }`}
+                      onClick={() => {
+                        setActiveClue(word.number);
+                        setActiveDirection('down');
+                      }}
+                    >
+                      <span className="font-medium">{word.number}.</span> {word.clue}
+                    </li>
+                  ))}
+                </ul>
               </div>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 flex justify-center">
-                <CrosswordGrid 
-                  words={puzzleData.puzzle.words} 
-                  gridSize={puzzleData.puzzle.gridSize}
-                  onSolve={handleSolve}
-                />
-              </div>
-              
-              <div className="bg-secondary/30 p-4 rounded-lg overflow-auto max-h-[500px] lg:max-h-full">
-                <div className="mb-4">
-                  <h3 className="font-semibold text-lg mb-2">Across</h3>
-                  <ul className="space-y-2">
-                    {acrossClues.map((word: any) => (
-                      <li 
-                        key={`across-${word.number}`}
-                        className={`text-sm p-2 rounded-md transition-colors cursor-pointer ${
-                          activeClue === word.number && activeDirection === 'across' 
-                            ? 'bg-primary/10 font-medium' 
-                            : 'hover:bg-secondary'
-                        }`}
-                        onClick={() => {
-                          setActiveClue(word.number);
-                          setActiveDirection('across');
-                        }}
-                      >
-                        <span className="font-medium">{word.number}.</span> {word.clue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                
-                <Separator className="my-4" />
-                
-                <div>
-                  <h3 className="font-semibold text-lg mb-2">Down</h3>
-                  <ul className="space-y-2">
-                    {downClues.map((word: any) => (
-                      <li 
-                        key={`down-${word.number}`}
-                        className={`text-sm p-2 rounded-md transition-colors cursor-pointer ${
-                          activeClue === word.number && activeDirection === 'down'
-                            ? 'bg-primary/10 font-medium' 
-                            : 'hover:bg-secondary'
-                        }`}
-                        onClick={() => {
-                          setActiveClue(word.number);
-                          setActiveDirection('down');
-                        }}
-                      >
-                        <span className="font-medium">{word.number}.</span> {word.clue}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </Card>
+          </div>
+        </div>
+      )}
+      
+      {/* Floating hearts background decoration */}
+      <div className="floating-hearts">
+        {Array.from({ length: 15 }).map((_, i) => (
+          <div 
+            key={i}
+            className="floating-heart"
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDuration: `${15 + Math.random() * 15}s`,
+              animationDelay: `${Math.random() * 5}s`
+            }}
+          />
+        ))}
       </div>
+      
+      {/* Success modal */}
+      <Dialog open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center text-2xl font-bold">
+              Congratulations! 🎉
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              You've successfully completed the crossword puzzle!
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col items-center space-y-4">
+            <div className="bg-primary/10 p-4 rounded-lg text-center">
+              <p className="text-sm text-muted-foreground mb-1">Time to complete</p>
+              <p className="text-2xl font-bold">{formatTime(completionTime || 0)}</p>
+            </div>
+            <Button onClick={() => navigate('/')} className="w-full">
+              Create Your Own Puzzle
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

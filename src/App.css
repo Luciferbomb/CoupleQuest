@@ -1,148 +1,123 @@
+/* Modern, responsive styling with couple-friendly colors */
+:root {
+  --color-primary: #FF6B6B;
+  --color-primary-light: #FFE2E2;
+  --color-secondary: #7B68EE;
+  --color-secondary-light: #E2D9FF;
+  --color-accent: #FFD166;
+  --color-background: #FFFFFF;
+  --color-text: #333333;
+  --color-text-light: #666666;
+  --gradient-love: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-medium: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-radius-sm: 0.375rem;
+  --border-radius-md: 0.75rem;
+  --border-radius-lg: 1.5rem;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  overflow-x: hidden;
+}
 
 #root {
   max-width: 100%;
   margin: 0 auto;
-  padding: 1rem;
+  padding: 0.5rem;
   text-align: center;
 }
 
 @media (min-width: 768px) {
   #root {
-    padding: 2rem;
+    padding: 1.5rem;
   }
 }
 
-.crossword-wrapper {
-  background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-  padding: 1rem;
-  border-radius: 1rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
-  overflow-x: auto;
-  max-width: 100%;
-}
-
-@media (min-width: 768px) {
-  .crossword-wrapper {
-    padding: 2rem;
-  }
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-
-.logo:hover {
-  filter: drop-shadow(0 0 2em rgba(240, 169, 80, 0.6));
-}
-
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em rgba(240, 169, 80, 0.6));
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 1.5em;
-  background-color: #FDF3E7;
-  border: 1px solid #F5C285;
-  border-radius: 0.75rem;
-}
-
-.read-the-docs {
-  color: #A69A8B;
-}
-
-/* Couple-themed decorative elements */
-.heart-decoration {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 120px;
-  height: 120px;
-  opacity: 0.1;
-  z-index: -1;
-  transform: rotate(10deg);
-}
-
-@media (min-width: 768px) {
-  .heart-decoration {
-    width: 180px;
-    height: 180px;
-  }
-}
-
-.couple-bg-pattern {
-  position: fixed;
-  top: 0;
-  left: 0;
+/* Modern page container with responsive padding */
+.page-container {
   width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0a950' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  z-index: -1;
-  pointer-events: none;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
+  min-height: calc(100vh - 4rem);
+  display: flex;
+  flex-direction: column;
 }
 
-/* Enhance the glass panel effect */
+@media (min-width: 768px) {
+  .page-container {
+    padding: 2rem;
+  }
+}
+
+/* Glass morphism panels for modern UI */
 .glass-panel {
-  background: rgba(255, 255, 255, 0.85) !important;
-  backdrop-filter: blur(10px) !important;
-  border: 1px solid rgba(245, 194, 133, 0.2) !important;
-  box-shadow: 
-    0 4px 30px rgba(0, 0, 0, 0.05),
-    0 1px 12px rgba(245, 194, 133, 0.15) !important;
-  padding: 1rem !important;
-  max-width: 100% !important;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(10px);
+  border-radius: var(--border-radius-md);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: var(--shadow-soft);
+  padding: 1.25rem;
+  max-width: 100%;
   margin: 0 auto;
+  transition: var(--transition-smooth);
+}
+
+.glass-panel:hover {
+  box-shadow: var(--shadow-medium);
+  transform: translateY(-2px);
 }
 
 @media (min-width: 768px) {
   .glass-panel {
-    padding: 2rem !important;
+    padding: 2rem;
   }
 }
 
-/* Enhance the crossword grid */
+/* Enhanced crossword grid with responsive sizing */
 .crossword-grid {
-  background: linear-gradient(135deg, #fff8f0 0%, #fff 100%) !important;
-  box-shadow: 
-    0 10px 30px rgba(0, 0, 0, 0.03),
-    0 1px 8px rgba(245, 194, 133, 0.1) !important;
-  border: 1px solid rgba(245, 194, 133, 0.3);
-  padding: 0.5rem !important;
+  background: white;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-soft);
+  padding: 0.5rem;
   max-width: 100%;
   overflow-x: auto;
   margin: 0 auto;
+  transition: var(--transition-smooth);
 }
 
 @media (min-width: 768px) {
   .crossword-grid {
-    padding: 1.5rem !important;
+    padding: 1rem;
   }
 }
 
+/* Responsive crossword cells */
 .crossword-cell {
-  transition: all 0.3s ease !important;
-  border-color: rgba(245, 194, 133, 0.3) !important;
-  min-width: 1.8rem;
-  min-height: 1.8rem;
-  width: 1.8rem;
-  height: 1.8rem;
+  transition: var(--transition-smooth);
+  border: 1px solid #e5e7eb;
+  min-width: 2rem;
+  min-height: 2rem;
+  width: 2rem;
+  height: 2rem;
+  font-size: 0.875rem;
+}
+
+@media (min-width: 480px) {
+  .crossword-cell {
+    min-width: 2.25rem;
+    min-height: 2.25rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    font-size: 1rem;
+  }
 }
 
 @media (min-width: 768px) {
@@ -151,25 +126,36 @@
     min-height: 2.5rem;
     width: 2.5rem;
     height: 2.5rem;
+    font-size: 1.125rem;
   }
 }
 
+/* Active cell styling with animation */
 .crossword-cell-active {
-  background-color: rgba(245, 194, 133, 0.2) !important;
-  border-color: rgba(245, 194, 133, 0.5) !important;
+  background-color: var(--color-primary-light);
+  border-color: var(--color-primary);
   transform: scale(1.05);
-  z-index: 2;
+  z-index: 10;
+  box-shadow: 0 0 0 2px var(--color-primary);
 }
 
-/* Animation for page transitions */
+/* Animations for page transitions and elements */
 .animate-fade-in {
-  animation: fadeInAnimation 0.5s ease-in-out forwards;
+  animation: fadeInAnimation 0.6s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUpAnimation 0.5s ease-out forwards;
+}
+
+.animate-pulse-soft {
+  animation: pulseSoft 2s infinite;
 }
 
 @keyframes fadeInAnimation {
   0% {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(20px);
   }
   100% {
     opacity: 1;
@@ -177,119 +163,214 @@
   }
 }
 
-/* Decorative elements for couple-friendly theme */
-.sparkle {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: rgba(245, 194, 133, 0.8);
-  animation: sparkle 2s infinite alternate;
-  z-index: -1;
-}
-
-.sparkle:nth-child(2n) {
-  animation-delay: 0.5s;
-}
-
-.sparkle:nth-child(3n) {
-  animation-delay: 1s;
-}
-
-@keyframes sparkle {
+@keyframes slideUpAnimation {
   0% {
-    opacity: 0.3;
-    transform: scale(1);
+    opacity: 0;
+    transform: translateY(30px);
   }
   100% {
-    opacity: 0.8;
-    transform: scale(1.5);
+    opacity: 1;
+    transform: translateY(0);
   }
 }
 
-/* Enhanced buttons */
-.btn-love {
-  background: linear-gradient(135deg, #F0A950 0%, #E89433 100%) !important;
-  color: white !important;
-  box-shadow: 0 4px 15px rgba(240, 169, 80, 0.3) !important;
-  transition: all 0.3s ease !important;
-}
-
-.btn-love:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 6px 20px rgba(240, 169, 80, 0.4) !important;
-}
-
-/* Mobile responsive adjustments */
-.page-container {
-  padding-top: 5rem !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-}
-
-@media (min-width: 768px) {
-  .page-container {
-    padding-top: 6rem !important;
-    padding-left: 2rem !important;
-    padding-right: 2rem !important;
+@keyframes pulseSoft {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
   }
 }
 
-/* Make form elements more mobile friendly */
-.form-group {
-  margin-bottom: 1rem;
+/* Floating hearts background decoration */
+.floating-hearts {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: -1;
+  overflow: hidden;
 }
 
-/* Adjust font sizes for mobile */
-h1 {
-  font-size: 1.75rem;
+.floating-heart {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23FF6B6B' opacity='0.2'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+  background-size: contain;
+  background-repeat: no-repeat;
+  opacity: 0;
+  animation: floatHeart 15s linear infinite;
 }
 
-@media (min-width: 768px) {
-  h1 {
-    font-size: 2.5rem;
+@keyframes floatHeart {
+  0% {
+    transform: translateY(100vh) scale(0.5) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.2;
+  }
+  90% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateY(-100px) scale(1.5) rotate(360deg);
+    opacity: 0;
   }
 }
 
-h2 {
-  font-size: 1.5rem;
+/* Modern button styling */
+.btn-modern {
+  background: var(--gradient-love);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 0.75rem 1.5rem;
+  font-weight: 600;
+  transition: var(--transition-smooth);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-@media (min-width: 768px) {
-  h2 {
-    font-size: 2rem;
-  }
+.btn-modern:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 }
 
-/* Mobile-friendly form fields */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-textarea {
-  padding: 0.5rem !important;
-  font-size: 1rem !important;
-}
-
-@media (min-width: 768px) {
-  input[type="text"],
-  input[type="email"],
-  input[type="password"],
-  textarea {
-    padding: 0.75rem !important;
-    font-size: 1rem !important;
-  }
-}
-
-/* Make card layouts stack nicely on mobile */
-.grid {
+/* Responsive grid layouts */
+.responsive-grid {
   display: grid;
-  grid-template-columns: repeat(1, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
+  width: 100%;
 }
 
-@media (min-width: 768px) {
-  .grid {
+@media (min-width: 640px) {
+  .responsive-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
 }
+
+@media (min-width: 1024px) {
+  .responsive-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}
+
+/* Modern form elements */
+.input-modern {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--border-radius-sm);
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  transition: var(--transition-smooth);
+}
+
+.input-modern:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
+}
+
+/* Clue list styling for better mobile experience */
+.clue-list {
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius-sm);
+}
+
+@media (min-width: 768px) {
+  .clue-list {
+    max-height: 500px;
+  }
+}
+
+.clue-item {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-sm);
+  margin-bottom: 0.5rem;
+  transition: var(--transition-smooth);
+  cursor: pointer;
+  text-align: left;
+}
+
+.clue-item:hover {
+  background-color: var(--color-primary-light);
+}
+
+.clue-item.active {
+  background-color: var(--color-primary-light);
+  border-left: 3px solid var(--color-primary);
+}
+
+/* Mobile-first navigation */
+.mobile-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: white;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-around;
+  padding: 0.75rem 0;
+  z-index: 100;
+}
+
+@media (min-width: 768px) {
+  .mobile-nav {
+    display: none;
+  }
+}
+
+/* Utility classes */
+.text-gradient {
+  background: var(--gradient-love);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+/* Crossword puzzle specific mobile optimizations */
+@media (max-width: 640px) {
+  .puzzle-container {
+    flex-direction: column;
+  }
+  
+  .clues-container {
+    order: 2;
+    margin-top: 1.5rem;
+  }
+  
+  .grid-container {
+    order: 1;
+    width: 100%;
+    overflow-x: auto;
+  }
+}
+

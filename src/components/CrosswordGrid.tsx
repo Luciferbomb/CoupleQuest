@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import CrosswordCell from './CrosswordCell';
 import { Button } from '@/components/ui/button';
@@ -440,68 +439,71 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
   
   // Render the grid
   return (
-    <div className="flex flex-col items-center space-y-6">
+    <div className="flex flex-col items-center space-y-6 w-full">
       <div className="flex items-center justify-between w-full max-w-xl mb-4">
-        <div className="flex items-center bg-muted/50 py-2 px-4 rounded-full">
+        <div className="flex items-center bg-secondary/10 py-2 px-4 rounded-full">
           <Clock className="mr-2 text-muted-foreground" size={18} />
-          <span className="text-lg">{formatTime(timeElapsed)}</span>
+          <span className="text-lg font-medium">{formatTime(timeElapsed)}</span>
         </div>
       </div>
       
-      <div 
-        className="crossword-grid shadow-lg bg-white rounded-lg overflow-hidden"
-        style={{ 
-          display: 'grid',
-          gridTemplateRows: `repeat(${gridSize}, minmax(0, 1fr))`,
-          gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
-          gap: '1px',
-          padding: '8px',
-          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          maxWidth: '100%',
-          width: 'fit-content'
-        }}
-      >
-        {grid.map((row, rowIndex) => (
-          row.map((cell, colIndex) => {
-            const isBlack = blackCells[rowIndex][colIndex];
-            if (isBlack) {
+      <div className="grid-container w-full overflow-x-auto pb-4">
+        <div 
+          className="crossword-grid mx-auto"
+          style={{ 
+            display: 'grid',
+            gridTemplateRows: `repeat(${gridSize}, minmax(0, 1fr))`,
+            gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))`,
+            gap: '1px',
+            padding: '8px',
+            maxWidth: '100%',
+            width: 'fit-content'
+          }}
+        >
+          {grid.map((row, rowIndex) => (
+            row.map((cell, colIndex) => {
+              const isBlack = blackCells[rowIndex][colIndex];
+              if (isBlack) {
+                return (
+                  <div
+                    key={`${rowIndex}-${colIndex}`}
+                    className="crossword-cell bg-black"
+                  />
+                );
+              }
+              
+              const cellKey = `${rowIndex}-${colIndex}`;
+              const isActive = activeCell?.row === rowIndex && activeCell?.col === colIndex;
+              const number = cellNumbers[cellKey];
+              const isCorrect = cellValidation.correct.has(cellKey);
+              const isIncorrect = cellValidation.incorrect.has(cellKey);
+              
               return (
-                <div
-                  key={`${rowIndex}-${colIndex}`}
-                  className="crossword-cell bg-black"
-                  style={{ minWidth: '2.5rem', minHeight: '2.5rem' }}
+                <CrosswordCell
+                  key={cellKey}
+                  row={rowIndex}
+                  col={colIndex}
+                  value={cell}
+                  onChange={(value) => handleCellChange(rowIndex, colIndex, value)}
+                  isActive={isActive}
+                  isCorrect={isCorrect}
+                  isIncorrect={isIncorrect}
+                  number={number}
+                  onFocus={() => handleCellFocus(rowIndex, colIndex)}
+                  onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
+                  activeDirection={activeDirection}
                 />
               );
-            }
-            
-            const cellKey = `${rowIndex}-${colIndex}`;
-            const isActive = activeCell?.row === rowIndex && activeCell?.col === colIndex;
-            const number = cellNumbers[cellKey];
-            const isCorrect = cellValidation.correct.has(cellKey);
-            const isIncorrect = cellValidation.incorrect.has(cellKey);
-            
-            return (
-              <CrosswordCell
-                key={cellKey}
-                row={rowIndex}
-                col={colIndex}
-                value={cell}
-                onChange={(value) => handleCellChange(rowIndex, colIndex, value)}
-                isActive={isActive}
-                isCorrect={isCorrect}
-                isIncorrect={isIncorrect}
-                number={number}
-                onFocus={() => handleCellFocus(rowIndex, colIndex)}
-                onKeyDown={(e) => handleKeyDown(e, rowIndex, colIndex)}
-                activeDirection={activeDirection}
-              />
-            );
-          })
-        ))}
+            })
+          ))}
+        </div>
       </div>
       
       <div className="w-full max-w-md">
-        <Button onClick={validateGrid} className="w-full flex items-center justify-center">
+        <Button 
+          onClick={validateGrid} 
+          className="w-full flex items-center justify-center bg-gradient-to-r from-primary to-secondary hover:opacity-90 transition-all"
+        >
           <Check className="mr-2" size={18} />
           Check Answers
         </Button>

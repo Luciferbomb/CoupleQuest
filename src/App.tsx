@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +8,8 @@ import CreatePuzzle from "./pages/CreatePuzzle";
 import SharePuzzle from "./pages/SharePuzzle";
 import SolvePuzzle from "./pages/SolvePuzzle";
 import NotFound from "./pages/NotFound";
+import FloatingHearts from "./components/FloatingHearts";
+import "./App.css";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,8 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <FloatingHearts count={12} />
+        
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/create" element={<CreatePuzzle />} />
