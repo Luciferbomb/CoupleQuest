@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -154,10 +155,7 @@ export default {
 			},
 			backdropBlur: {
 				'xs': '2px',
-			},
-			backgroundImage: {
-				'gradient-conic': 'conic-gradient(var(--conic-position), var(--tw-gradient-stops))',
-			},
+			}
 		}
 	},
 	plugins: [require("tailwindcss-animate")],
