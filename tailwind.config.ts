@@ -97,6 +97,9 @@ export default {
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)'
 			},
+			backgroundImage: {
+        'gradient-conic': 'conic-gradient(var(--conic-position), var(--tw-gradient-stops))',
+      },
 			keyframes: {
 				'accordion-down': {
 					from: { height: '0' },
@@ -133,6 +136,10 @@ export default {
 				'pulse-soft': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.7' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
@@ -144,7 +151,8 @@ export default {
 				'slide-down': 'slide-down 0.4s ease-out',
 				'scale-in': 'scale-in 0.3s ease-out',
 				'scale-out': 'scale-out 0.3s ease-out',
-				'pulse-soft': 'pulse-soft 2s ease-in-out infinite'
+				'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+				'float': 'float 3s ease-in-out infinite'
 			},
 			boxShadow: {
 				'glass': '0 4px 30px rgba(0, 0, 0, 0.1)',

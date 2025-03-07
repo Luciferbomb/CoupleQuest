@@ -6,6 +6,7 @@ import QuestionForm from '@/components/QuestionForm';
 import { toast } from '@/components/ui/use-toast';
 import { generateCrosswordPuzzle, generatePuzzleSlug } from '@/utils/puzzleGenerator';
 import Navbar from '@/components/Navbar';
+import { Heart, Sparkles } from 'lucide-react';
 
 interface Answer {
   question: string;
@@ -60,16 +61,41 @@ const CreatePuzzle = () => {
     }
   };
   
+  // Decorative sparkles
+  const sparklePositions = [
+    { top: '5%', left: '10%' },
+    { top: '20%', right: '15%' },
+    { top: '50%', left: '5%' },
+    { top: '70%', right: '8%' },
+    { top: '85%', left: '15%' },
+    { top: '30%', left: '80%' }
+  ];
+  
   return (
     <div className="min-h-screen bg-background">
+      <div className="couple-bg-pattern"></div>
+      {sparklePositions.map((pos, i) => (
+        <div key={i} className="sparkle" style={pos}></div>
+      ))}
+      
       <Navbar />
       
       <div className="page-container pt-24 animate-fade-in">
-        <Card className="glass-panel p-8 max-w-3xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">{creatorName}'s Relationship Riddle</h1>
-            <p className="text-muted-foreground">
+        <Card className="glass-panel p-8 max-w-3xl mx-auto relative overflow-hidden">
+          <div className="heart-decoration">
+            <Heart size={180} fill="rgba(240, 169, 80, 0.15)" stroke="none" />
+          </div>
+          
+          <div className="mb-6 relative">
+            <div className="flex items-center justify-center mb-4">
+              <div className="p-3 bg-beige-100 rounded-full mr-3">
+                <Sparkles className="text-beige-500 h-6 w-6" />
+              </div>
+              <h1 className="text-3xl font-bold">{creatorName}'s Relationship Riddle</h1>
+            </div>
+            <p className="text-muted-foreground text-center max-w-lg mx-auto">
               Answer the questions below to create a custom crossword puzzle for your partner to solve.
+              Make it personal and meaningful!
             </p>
           </div>
           

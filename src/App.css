@@ -53,3 +53,117 @@
 .read-the-docs {
   color: #A69A8B;
 }
+
+/* Couple-themed decorative elements */
+.heart-decoration {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 180px;
+  height: 180px;
+  opacity: 0.1;
+  z-index: -1;
+  transform: rotate(10deg);
+}
+
+.couple-bg-pattern {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23f0a950' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* Enhance the glass panel effect */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 1px solid rgba(245, 194, 133, 0.2) !important;
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.05),
+    0 1px 12px rgba(245, 194, 133, 0.15) !important;
+}
+
+/* Enhance the crossword grid */
+.crossword-grid {
+  background: linear-gradient(135deg, #fff8f0 0%, #fff 100%) !important;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.03),
+    0 1px 8px rgba(245, 194, 133, 0.1) !important;
+  border: 1px solid rgba(245, 194, 133, 0.3);
+  padding: 1.5rem !important;
+}
+
+.crossword-cell {
+  transition: all 0.3s ease !important;
+  border-color: rgba(245, 194, 133, 0.3) !important;
+}
+
+.crossword-cell-active {
+  background-color: rgba(245, 194, 133, 0.2) !important;
+  border-color: rgba(245, 194, 133, 0.5) !important;
+  transform: scale(1.05);
+  z-index: 2;
+}
+
+/* Animation for page transitions */
+.animate-fade-in {
+  animation: fadeInAnimation 0.5s ease-in-out forwards;
+}
+
+@keyframes fadeInAnimation {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Decorative elements for couple-friendly theme */
+.sparkle {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: rgba(245, 194, 133, 0.8);
+  animation: sparkle 2s infinite alternate;
+  z-index: -1;
+}
+
+.sparkle:nth-child(2n) {
+  animation-delay: 0.5s;
+}
+
+.sparkle:nth-child(3n) {
+  animation-delay: 1s;
+}
+
+@keyframes sparkle {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0.8;
+    transform: scale(1.5);
+  }
+}
+
+/* Enhanced buttons */
+.btn-love {
+  background: linear-gradient(135deg, #F0A950 0%, #E89433 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 15px rgba(240, 169, 80, 0.3) !important;
+  transition: all 0.3s ease !important;
+}
+
+.btn-love:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 6px 20px rgba(240, 169, 80, 0.4) !important;
+}
