@@ -1,12 +1,54 @@
-
 /*
   Content-Type: text/html; charset=utf-8
+  X-Content-Type-Options: nosniff
 
-*.js
+/*.html
+  Content-Type: text/html; charset=utf-8
+
+/*.js
   Content-Type: application/javascript; charset=utf-8
 
-*.mjs
+/assets/*.js
   Content-Type: application/javascript; charset=utf-8
 
-*.css
+/*.mjs
+  Content-Type: application/javascript; charset=utf-8
+
+/*.css
   Content-Type: text/css; charset=utf-8
+
+/assets/*.css
+  Content-Type: text/css; charset=utf-8
+
+/*.json
+  Content-Type: application/json; charset=utf-8
+
+/*.js.map
+  Content-Type: application/json; charset=utf-8
+
+/*.png
+  Content-Type: image/png
+
+/*.jpg
+  Content-Type: image/jpeg
+
+/*.jpeg
+  Content-Type: image/jpeg
+
+/*.svg
+  Content-Type: image/svg+xml
+
+/*.ico
+  Content-Type: image/x-icon
+
+/*.webp
+  Content-Type: image/webp
+
+/*.woff
+  Content-Type: font/woff
+
+/*.woff2
+  Content-Type: font/woff2
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable

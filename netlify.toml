@@ -1,68 +1,99 @@
+[build]
+  command = "npm run build:netlify"
+  publish = "dist"
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
 
+# Ensure proper MIME types for all assets
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+
 [[headers]]
   for = "/*.js"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
-    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/assets/*.js"
+  [headers.values]
+    Content-Type = "application/javascript; charset=utf-8"
 
 [[headers]]
   for = "/*.mjs"
   [headers.values]
     Content-Type = "application/javascript; charset=utf-8"
-    X-Content-Type-Options = "nosniff"
-
-[[headers]]
-  for = "/*.js.map"
-  [headers.values]
-    Content-Type = "application/json"
-    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
-    Content-Type = "text/css"
-    X-Content-Type-Options = "nosniff"
+    Content-Type = "text/css; charset=utf-8"
+
+[[headers]]
+  for = "/assets/*.css"
+  [headers.values]
+    Content-Type = "text/css; charset=utf-8"
 
 [[headers]]
   for = "/*.html"
   [headers.values]
     Content-Type = "text/html; charset=utf-8"
-    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.json"
   [headers.values]
-    Content-Type = "application/json"
-    X-Content-Type-Options = "nosniff"
+    Content-Type = "application/json; charset=utf-8"
+
+[[headers]]
+  for = "/*.js.map"
+  [headers.values]
+    Content-Type = "application/json; charset=utf-8"
 
 [[headers]]
   for = "/*.png"
   [headers.values]
     Content-Type = "image/png"
-    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.jpg"
   [headers.values]
     Content-Type = "image/jpeg"
-    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.jpeg"
+  [headers.values]
+    Content-Type = "image/jpeg"
 
 [[headers]]
   for = "/*.svg"
   [headers.values]
     Content-Type = "image/svg+xml"
-    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.ico"
   [headers.values]
     Content-Type = "image/x-icon"
-    X-Content-Type-Options = "nosniff"
 
+[[headers]]
+  for = "/*.webp"
+  [headers.values]
+    Content-Type = "image/webp"
+
+[[headers]]
+  for = "/*.woff"
+  [headers.values]
+    Content-Type = "font/woff"
+
+[[headers]]
+  for = "/*.woff2"
+  [headers.values]
+    Content-Type = "font/woff2"
+
+# Cache control for assets
 [[headers]]
   for = "/assets/*"
   [headers.values]
