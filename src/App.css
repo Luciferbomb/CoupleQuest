@@ -1,16 +1,30 @@
 
 #root {
-  max-width: 1280px;
+  max-width: 100%;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1rem;
   text-align: center;
+}
+
+@media (min-width: 768px) {
+  #root {
+    padding: 2rem;
+  }
 }
 
 .crossword-wrapper {
   background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 1rem;
   box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+@media (min-width: 768px) {
+  .crossword-wrapper {
+    padding: 2rem;
+  }
 }
 
 .logo {
@@ -44,7 +58,7 @@
 }
 
 .card {
-  padding: 2em;
+  padding: 1.5em;
   background-color: #FDF3E7;
   border: 1px solid #F5C285;
   border-radius: 0.75rem;
@@ -59,11 +73,18 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 180px;
-  height: 180px;
+  width: 120px;
+  height: 120px;
   opacity: 0.1;
   z-index: -1;
   transform: rotate(10deg);
+}
+
+@media (min-width: 768px) {
+  .heart-decoration {
+    width: 180px;
+    height: 180px;
+  }
 }
 
 .couple-bg-pattern {
@@ -85,6 +106,15 @@
   box-shadow: 
     0 4px 30px rgba(0, 0, 0, 0.05),
     0 1px 12px rgba(245, 194, 133, 0.15) !important;
+  padding: 1rem !important;
+  max-width: 100% !important;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .glass-panel {
+    padding: 2rem !important;
+  }
 }
 
 /* Enhance the crossword grid */
@@ -94,12 +124,34 @@
     0 10px 30px rgba(0, 0, 0, 0.03),
     0 1px 8px rgba(245, 194, 133, 0.1) !important;
   border: 1px solid rgba(245, 194, 133, 0.3);
-  padding: 1.5rem !important;
+  padding: 0.5rem !important;
+  max-width: 100%;
+  overflow-x: auto;
+  margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  .crossword-grid {
+    padding: 1.5rem !important;
+  }
 }
 
 .crossword-cell {
   transition: all 0.3s ease !important;
   border-color: rgba(245, 194, 133, 0.3) !important;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+@media (min-width: 768px) {
+  .crossword-cell {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+    width: 2.5rem;
+    height: 2.5rem;
+  }
 }
 
 .crossword-cell-active {
@@ -166,4 +218,78 @@
 .btn-love:hover {
   transform: translateY(-2px) !important;
   box-shadow: 0 6px 20px rgba(240, 169, 80, 0.4) !important;
+}
+
+/* Mobile responsive adjustments */
+.page-container {
+  padding-top: 5rem !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+@media (min-width: 768px) {
+  .page-container {
+    padding-top: 6rem !important;
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Make form elements more mobile friendly */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+/* Adjust font sizes for mobile */
+h1 {
+  font-size: 1.75rem;
+}
+
+@media (min-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+}
+
+h2 {
+  font-size: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  h2 {
+    font-size: 2rem;
+  }
+}
+
+/* Mobile-friendly form fields */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+textarea {
+  padding: 0.5rem !important;
+  font-size: 1rem !important;
+}
+
+@media (min-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  textarea {
+    padding: 0.75rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+/* Make card layouts stack nicely on mobile */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
 }
