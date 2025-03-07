@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import CrosswordCell from './CrosswordCell';
 import { Button } from '@/components/ui/button';
-import { Check, Clock } from 'lucide-react';
+import { Check, Clock, Keyboard } from 'lucide-react';
 import { formatTime } from '@/utils/timeUtils';
+import MobileKeyboard from './MobileKeyboard';
+import { AnimatePresence } from 'framer-motion';
 
 interface Word {
   answer: string;
@@ -65,6 +67,10 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
   
   // Track active words
   const [activeWords, setActiveWords] = useState<Word[]>([]);
+  
+  // Add this to the CrosswordGrid component, after the existing state variables
+  const [showMobileKeyboard, setShowMobileKeyboard] = useState(false);
+  const [isMobileDevice, setIsMobileDevice] = useState(false);
   
   // Start the timer
   useEffect(() => {
@@ -437,6 +443,76 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
     }
   }, [words, activeCell]);
   
+  // Add this useEffect to detect mobile devices
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobileDevice(window.innerWidth < 768 || 'ontouchstart' in window);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+  
+  // Add these handlers for the mobile keyboard
+  const handleKeyPress = (key: string) => {
+    if (activeCell) {
+      const { row, col } = activeCell;
+      handleCellChange(row, col, key);
+    }
+  };
+  
+  const handleArrowPress = (direction: 'up' | 'down' | 'left' | 'right') => {
+    if (!activeCell) return;
+    
+    const { row, col } = activeCell;
+    let newRow = row;
+    let newCol = col;
+    
+    switch (direction) {
+      case 'up':
+        newRow = Math.max(0, row - 1);
+        break;
+      case 'down':
+        newRow = Math.min(gridSize - 1, row + 1);
+        break;
+      case 'left':
+        newCol = Math.max(0, col - 1);
+        break;
+      case 'right':
+        newCol = Math.min(gridSize - 1, col + 1);
+        break;
+    }
+    
+    // Skip black cells
+    if (!blackCells[newRow][newCol]) {
+      setActiveCell({ row: newRow, col: newCol });
+    }
+  };
+  
+  const handleDelete = () => {
+    if (activeCell) {
+      const { row, col } = activeCell;
+      handleCellChange(row, col, '');
+      
+      // Move to previous cell if in across mode
+      if (activeDirection === 'across' && col > 0) {
+        const prevCol = col - 1;
+        if (!blackCells[row][prevCol]) {
+          setActiveCell({ row, col: prevCol });
+        }
+      }
+      // Move to previous cell if in down mode
+      else if (activeDirection === 'down' && row > 0) {
+        const prevRow = row - 1;
+        if (!blackCells[prevRow][col]) {
+          setActiveCell({ row: prevRow, col });
+        }
+      }
+    }
+  };
+  
   // Render the grid
   return (
     <div className="flex flex-col items-center space-y-6 w-full">
@@ -445,6 +521,18 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
           <Clock className="mr-2 text-muted-foreground" size={18} />
           <span className="text-lg font-medium">{formatTime(timeElapsed)}</span>
         </div>
+        
+        {isMobileDevice && (
+          <Button
+            variant="outline"
+            size="sm"
+            className="ml-auto"
+            onClick={() => setShowMobileKeyboard(!showMobileKeyboard)}
+          >
+            <Keyboard className="mr-2" size={16} />
+            {showMobileKeyboard ? 'Hide' : 'Show'} Keyboard
+          </Button>
+        )}
       </div>
       
       <div className="grid-container w-full overflow-x-auto pb-4">
@@ -457,7 +545,10 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
             gap: '1px',
             padding: '8px',
             maxWidth: '100%',
-            width: 'fit-content'
+            width: 'fit-content',
+            boxShadow: 'var(--shadow-soft)',
+            borderRadius: 'var(--border-radius-md)',
+            background: 'white'
           }}
         >
           {grid.map((row, rowIndex) => (
@@ -468,6 +559,7 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
                   <div
                     key={`${rowIndex}-${colIndex}`}
                     className="crossword-cell bg-black"
+                    style={{ aspectRatio: '1/1' }}
                   />
                 );
               }
@@ -508,6 +600,17 @@ const CrosswordGrid = ({ words, gridSize, onSolve }: CrosswordGridProps) => {
           Check Answers
         </Button>
       </div>
+      
+      <AnimatePresence>
+        {showMobileKeyboard && (
+          <MobileKeyboard 
+            onKeyPress={handleKeyPress}
+            onClose={() => setShowMobileKeyboard(false)}
+            onArrowPress={handleArrowPress}
+            onDelete={handleDelete}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -36,9 +36,13 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
     }
   }, [isActive]);
 
+  // Detect if we're on a mobile device
+  const isMobile = typeof window !== 'undefined' && 
+    (window.innerWidth < 768 || 'ontouchstart' in window);
+
   if (isBlack) {
     return (
-      <div className="bg-black w-full h-full rounded-sm" />
+      <div className="bg-black w-full h-full rounded-sm" style={{ aspectRatio: '1/1' }} />
     );
   }
 
@@ -68,6 +72,16 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
     }
   };
 
+  // For mobile, we'll use a div instead of an input to prevent keyboard popup
+  const handleCellClick = () => {
+    onFocus();
+    // On mobile, we don't want to focus the input directly
+    // as it will bring up the keyboard
+    if (!isMobile && inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   return (
     <motion.div
       className={`
@@ -76,6 +90,8 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
         w-full h-full
         text-center select-none
         border rounded-sm
+        bg-white
+        no-select
         ${isActive ? 'border-primary' : 'border-gray-200'}
         ${isCorrect ? 'border-green-400' : ''}
         ${isIncorrect ? 'border-red-400' : ''}
@@ -85,39 +101,51 @@ const CrosswordCell: React.FC<CrosswordCellProps> = ({
       variants={cellVariants}
       initial="default"
       animate={cellStatus}
-      onClick={onFocus}
+      onClick={handleCellClick}
+      style={{ aspectRatio: '1/1' }}
     >
       {number && (
         <span className="absolute top-0.5 left-1 text-[10px] font-medium text-gray-600">
           {number}
         </span>
       )}
-      <input
-        ref={inputRef}
-        type="text"
-        maxLength={1}
-        value={value || ''}
-        onChange={(e) => {
-          const newValue = e.target.value.toUpperCase();
-          if (newValue.match(/^[A-Z]?$/)) {
-            onChange(newValue);
-          }
-        }}
-        onFocus={onFocus}
-        onKeyDown={onKeyDown}
-        className={`
-          w-full h-full
-          text-center font-semibold
-          bg-transparent
-          focus:outline-none
-          uppercase
-          ${isCorrect ? 'text-green-600' : ''}
-          ${isIncorrect ? 'text-red-600' : ''}
-          ${isActive ? 'text-primary' : 'text-gray-800'}
-        `}
-        aria-label={`Crossword cell ${number ? `number ${number}` : ''}`}
-        data-direction={activeDirection}
-      />
+      {isMobile ? (
+        <div className="w-full h-full flex items-center justify-center font-semibold uppercase text-lg">
+          {value}
+        </div>
+      ) : (
+        <input
+          ref={inputRef}
+          type="text"
+          maxLength={1}
+          value={value || ''}
+          onChange={(e) => {
+            const newValue = e.target.value.toUpperCase();
+            if (newValue.match(/^[A-Z]?$/)) {
+              onChange(newValue);
+            }
+          }}
+          onFocus={onFocus}
+          onKeyDown={onKeyDown}
+          className={`
+            w-full h-full
+            text-center font-semibold
+            bg-transparent
+            focus:outline-none
+            uppercase
+            ${isCorrect ? 'text-green-600' : ''}
+            ${isIncorrect ? 'text-red-600' : ''}
+            ${isActive ? 'text-primary' : 'text-gray-800'}
+            touch-manipulation
+          `}
+          aria-label={`Crossword cell ${number ? `number ${number}` : ''}`}
+          data-direction={activeDirection}
+          inputMode="text"
+          autoComplete="off"
+          autoCorrect="off"
+          spellCheck="false"
+        />
+      )}
     </motion.div>
   );
 };

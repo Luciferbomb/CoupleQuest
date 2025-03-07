@@ -155,6 +155,26 @@ const SolvePuzzle = () => {
             <div className="h-4 w-48 bg-primary/20 rounded"></div>
           </div>
         </div>
+      ) : !puzzleData && !puzzleSlug ? (
+        <div className="flex flex-col items-center justify-center h-[70vh]">
+          <div className="text-center max-w-md glass-panel animate-fade-in">
+            <h2 className="text-2xl font-bold mb-4">Enter Puzzle Code</h2>
+            <p className="text-muted-foreground mb-6">
+              Enter the code shared with you to solve the puzzle.
+            </p>
+            <div className="space-y-4">
+              <Input 
+                placeholder="Enter puzzle code" 
+                value={puzzleCode} 
+                onChange={(e) => setPuzzleCode(e.target.value)}
+                className="input-modern"
+              />
+              <Button onClick={handleLoadPuzzle} className="w-full">
+                Load Puzzle
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : !puzzleData ? (
         <div className="flex flex-col items-center justify-center h-[70vh]">
           <div className="text-center max-w-md glass-panel animate-fade-in">
@@ -168,8 +188,8 @@ const SolvePuzzle = () => {
           </div>
         </div>
       ) : (
-        <div className="animate-fade-in">
-          <div className="text-center mb-8">
+        <div className="animate-fade-in pt-16 md:pt-20">
+          <div className="text-center mb-6">
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
               <span className="text-gradient">Solve the Puzzle</span>
             </h1>
@@ -194,22 +214,25 @@ const SolvePuzzle = () => {
                   Across
                 </h3>
                 <ul className="clue-list">
-                  {acrossClues.map((word: any) => (
-                    <li 
-                      key={`across-${word.number}`}
-                      className={`clue-item ${
-                        activeClue === word.number && activeDirection === 'across' 
-                          ? 'active' 
-                          : ''
-                      }`}
-                      onClick={() => {
-                        setActiveClue(word.number);
-                        setActiveDirection('across');
-                      }}
-                    >
-                      <span className="font-medium">{word.number}.</span> {word.clue}
-                    </li>
-                  ))}
+                  {puzzleData.puzzle.words
+                    .filter((word: any) => word.direction === 'across')
+                    .sort((a: any, b: any) => a.number - b.number)
+                    .map((word: any) => (
+                      <li 
+                        key={`across-${word.number}`}
+                        className={`clue-item ${
+                          activeClue === word.number && activeDirection === 'across' 
+                            ? 'active' 
+                            : ''
+                        }`}
+                        onClick={() => {
+                          setActiveClue(word.number);
+                          setActiveDirection('across');
+                        }}
+                      >
+                        <span className="font-medium">{word.number}.</span> {word.clue}
+                      </li>
+                    ))}
                 </ul>
               </div>
               
@@ -221,22 +244,25 @@ const SolvePuzzle = () => {
                   Down
                 </h3>
                 <ul className="clue-list">
-                  {downClues.map((word: any) => (
-                    <li 
-                      key={`down-${word.number}`}
-                      className={`clue-item ${
-                        activeClue === word.number && activeDirection === 'down' 
-                          ? 'active' 
-                          : ''
-                      }`}
-                      onClick={() => {
-                        setActiveClue(word.number);
-                        setActiveDirection('down');
-                      }}
-                    >
-                      <span className="font-medium">{word.number}.</span> {word.clue}
-                    </li>
-                  ))}
+                  {puzzleData.puzzle.words
+                    .filter((word: any) => word.direction === 'down')
+                    .sort((a: any, b: any) => a.number - b.number)
+                    .map((word: any) => (
+                      <li 
+                        key={`down-${word.number}`}
+                        className={`clue-item ${
+                          activeClue === word.number && activeDirection === 'down' 
+                            ? 'active' 
+                            : ''
+                        }`}
+                        onClick={() => {
+                          setActiveClue(word.number);
+                          setActiveDirection('down');
+                        }}
+                      >
+                        <span className="font-medium">{word.number}.</span> {word.clue}
+                      </li>
+                    ))}
                 </ul>
               </div>
             </div>

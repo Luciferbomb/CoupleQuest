@@ -91,6 +91,7 @@ body {
   overflow-x: auto;
   margin: 0 auto;
   transition: var(--transition-smooth);
+  touch-action: manipulation;
 }
 
 @media (min-width: 768px) {
@@ -103,11 +104,23 @@ body {
 .crossword-cell {
   transition: var(--transition-smooth);
   border: 1px solid #e5e7eb;
-  min-width: 2rem;
-  min-height: 2rem;
-  width: 2rem;
-  height: 2rem;
-  font-size: 0.875rem;
+  min-width: 1.8rem;
+  min-height: 1.8rem;
+  width: 1.8rem;
+  height: 1.8rem;
+  font-size: 0.75rem;
+  aspect-ratio: 1/1;
+  touch-action: manipulation;
+}
+
+@media (min-width: 375px) {
+  .crossword-cell {
+    min-width: 2rem;
+    min-height: 2rem;
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.875rem;
+  }
 }
 
 @media (min-width: 480px) {
@@ -356,6 +369,21 @@ body {
   animation-delay: 0.3s;
 }
 
+/* Grid container for better mobile display */
+.grid-container {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: 1rem;
+}
+
+.grid-container::-webkit-scrollbar {
+  display: none;
+}
+
 /* Crossword puzzle specific mobile optimizations */
 @media (max-width: 640px) {
   .puzzle-container {
@@ -371,6 +399,95 @@ body {
     order: 1;
     width: 100%;
     overflow-x: auto;
+    padding-bottom: 1rem;
   }
+}
+
+/* Mobile keyboard styles */
+.mobile-keyboard {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 0.75rem;
+  z-index: 1000;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.keyboard-key {
+  width: 2.5rem;
+  height: 3rem;
+  margin: 0.25rem;
+  border-radius: 0.5rem;
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  font-size: 1.25rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--transition-smooth);
+}
+
+.keyboard-key:active {
+  background-color: var(--color-primary-light);
+  transform: scale(0.95);
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 767px) {
+  button, 
+  a, 
+  input, 
+  select, 
+  .clickable {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .crossword-cell input {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  /* Add extra padding to the bottom when mobile keyboard is shown */
+  .keyboard-open {
+    padding-bottom: 260px;
+  }
+  
+  /* Ensure the grid is centered and visible */
+  .grid-container {
+    padding-bottom: 2rem;
+    margin-bottom: 1rem;
+  }
+}
+
+/* Improve focus states for accessibility */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Add smooth scrolling for the whole page */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Ensure the page doesn't shift when showing/hiding the keyboard */
+body.keyboard-open {
+  padding-bottom: 260px;
 }
 
