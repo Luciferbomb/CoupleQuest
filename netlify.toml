@@ -6,44 +6,64 @@
 [[headers]]
   for = "/*.js"
   [headers.values]
-    Content-Type = "application/javascript"
+    Content-Type = "application/javascript; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.mjs"
   [headers.values]
-    Content-Type = "application/javascript"
+    Content-Type = "application/javascript; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/*.js.map"
+  [headers.values]
+    Content-Type = "application/json"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.css"
   [headers.values]
     Content-Type = "text/css"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.html"
   [headers.values]
-    Content-Type = "text/html"
+    Content-Type = "text/html; charset=utf-8"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.json"
   [headers.values]
     Content-Type = "application/json"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.png"
   [headers.values]
     Content-Type = "image/png"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.jpg"
   [headers.values]
     Content-Type = "image/jpeg"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.svg"
   [headers.values]
     Content-Type = "image/svg+xml"
+    X-Content-Type-Options = "nosniff"
 
 [[headers]]
   for = "/*.ico"
   [headers.values]
-    Content-Type = "image/x-icon" 
+    Content-Type = "image/x-icon"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable" 
