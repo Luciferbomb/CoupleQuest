@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Favicon Generator</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #f5f5f5;
+    }
+    canvas {
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="favicon" width="32" height="32"></canvas>
+  
+  <script>
+    const canvas = document.getElementById('favicon');
+    const ctx = canvas.getContext('2d');
+    
+    // Create gradient background
+    const gradient = ctx.createLinearGradient(0, 0, 32, 32);
+    gradient.addColorStop(0, '#FF6B6B');
+    gradient.addColorStop(1, '#7B68EE');
+    
+    // Draw rounded rectangle
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.roundRect(0, 0, 32, 32, 6);
+    ctx.fill();
+    
+    // Draw heart shape
+    ctx.fillStyle = 'white';
+    ctx.beginPath();
+    ctx.moveTo(16, 8);
+    ctx.bezierCurveTo(16, 8, 12, 4, 8, 8);
+    ctx.bezierCurveTo(4, 12, 8, 20, 16, 24);
+    ctx.bezierCurveTo(24, 20, 28, 12, 24, 8);
+    ctx.bezierCurveTo(20, 4, 16, 8, 16, 8);
+    ctx.fill();
+    
+    // Draw crossword grid lines
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 1;
+    
+    // Horizontal lines
+    ctx.beginPath();
+    ctx.moveTo(10, 14);
+    ctx.lineTo(22, 14);
+    ctx.moveTo(10, 18);
+    ctx.lineTo(22, 18);
+    
+    // Vertical lines
+    ctx.moveTo(14, 10);
+    ctx.lineTo(14, 22);
+    ctx.moveTo(18, 10);
+    ctx.lineTo(18, 22);
+    ctx.stroke();
+    
+    // Convert to data URL
+    const dataUrl = canvas.toDataURL('image/png');
+    console.log(dataUrl);
+    
+    // Create download link
+    const link = document.createElement('a');
+    link.download = 'favicon.png';
+    link.href = dataUrl;
+    link.textContent = 'Download Favicon';
+    document.body.appendChild(link);
+  </script>
+</body>
+</html> 
