@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 const Navbar = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -20,11 +21,16 @@ const Navbar = () => {
   }, []);
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-      scrolled 
-        ? 'bg-beige-50/95 backdrop-blur-md shadow-elevation-low' 
-        : 'bg-transparent'
-    }`}>
+    <motion.nav 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-beige-50/95 backdrop-blur-md shadow-elevation-low' 
+          : 'bg-transparent'
+      }`}
+    >
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
         <Link to="/" className="flex items-center space-x-2 transition-transform hover:scale-105">
           <span className="font-bold text-xl tracking-tight text-beige-800">Couple Quest</span>
@@ -35,7 +41,7 @@ const Navbar = () => {
             to="/create" 
             className={`px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
               location.pathname === '/create'
-                ? 'bg-beige-500 text-white' 
+                ? 'bg-beige-500 text-white shadow-md' 
                 : 'hover:bg-beige-100 text-beige-800'
             }`}
           >
@@ -46,7 +52,7 @@ const Navbar = () => {
             to="/solve" 
             className={`px-3 py-2 rounded-lg text-sm transition-all duration-200 ${
               location.pathname === '/solve'
-                ? 'bg-beige-500 text-white' 
+                ? 'bg-beige-500 text-white shadow-md' 
                 : 'hover:bg-beige-100 text-beige-800'
             }`}
           >
@@ -54,7 +60,7 @@ const Navbar = () => {
           </Link>
         </div>
       </div>
-    </nav>
+    </motion.nav>
   );
 };
 

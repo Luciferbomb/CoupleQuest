@@ -6,6 +6,8 @@ import QuestionForm from '@/components/QuestionForm';
 import { toast } from '@/components/ui/use-toast';
 import { generateCrosswordPuzzle, generatePuzzleSlug } from '@/utils/puzzleGenerator';
 import Navbar from '@/components/Navbar';
+import { motion } from 'framer-motion';
+import { LampContainer } from '@/components/ui/lamp';
 
 interface Answer {
   question: string;
@@ -61,18 +63,33 @@ const CreatePuzzle = () => {
   };
   
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
       <Navbar />
       
-      <div className="page-container pt-24 animate-fade-in">
-        <Card className="glass-panel p-8 max-w-3xl mx-auto">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">{creatorName}'s Relationship Riddle</h1>
-            <p className="text-muted-foreground">
+      <div className="relative w-full">
+        <LampContainer className="h-[40vh] min-h-[400px]">
+          <motion.div
+            initial={{ opacity: 0.5, y: 100 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{
+              delay: 0.3,
+              duration: 0.8,
+              ease: "easeInOut",
+            }}
+            className="relative z-50 mt-8"
+          >
+            <h1 className="bg-gradient-to-br from-beige-300 to-beige-600 py-4 bg-clip-text text-center text-4xl font-medium tracking-tight text-transparent md:text-6xl">
+              {creatorName}'s <br /> Relationship Riddle
+            </h1>
+            <p className="text-beige-200 text-center mt-4 max-w-md mx-auto">
               Answer the questions below to create a custom crossword puzzle for your partner to solve.
             </p>
-          </div>
-          
+          </motion.div>
+        </LampContainer>
+      </div>
+      
+      <div className="page-container -mt-24 relative z-10 animate-fade-in">
+        <Card className="glass-panel p-8 max-w-3xl mx-auto border-beige-200/50 shadow-xl">
           <QuestionForm onSubmit={handleSubmit} creatorName={creatorName} />
         </Card>
       </div>

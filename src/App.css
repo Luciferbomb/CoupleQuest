@@ -53,3 +53,30 @@
 .read-the-docs {
   color: #A69A8B;
 }
+
+/* Updated glass effects for better UI */
+.glass-card {
+  background: rgba(255, 252, 247, 0.7);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(245, 194, 133, 0.3);
+  box-shadow: 
+    0 4px 30px rgba(0, 0, 0, 0.05),
+    inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  border-radius: 1rem;
+}
+
+.lamp-highlight {
+  position: relative;
+}
+
+.lamp-highlight::after {
+  content: '';
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 200px;
+  height: 50px;
+  background: radial-gradient(ellipse at center, rgba(240, 169, 80, 0.3) 0%, rgba(240, 169, 80, 0) 70%);
+  pointer-events: none;
+}
